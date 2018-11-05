@@ -1,5 +1,7 @@
 # GA4GH Workflow Interoperability
 
+> **This repo has been transferred to [ga4gh/cloud-interop-testing](https://github.com/ga4gh/cloud-interop-testing) for future development and maintainence as the testbed scope expands. The current repo will be left up reference/archival purposes only.**
+
 [![Travis-CI Build Status](https://travis-ci.org/Sage-Bionetworks/workflow-interop.svg?branch=develop)](https://travis-ci.org/Sage-Bionetworks/workflow-interop.svg?branch=develop) 
 [![Coverage Status](https://coveralls.io/repos/github/Sage-Bionetworks/workflow-interop/badge.svg?branch=develop)](https://coveralls.io/Sage-Bionetworks/workflow-interop?branch=develop)
 
