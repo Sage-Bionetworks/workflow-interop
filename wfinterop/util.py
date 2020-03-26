@@ -28,7 +28,10 @@ def open_file(path, mode):
         else:
             f = open(path, mode)
     else:
-        f = urlopen(path)
+        if path.startswith('http'):
+            f = urlopen(path)
+        else:
+            f = open(path, 'r')
     yield f
     f.close()
 
