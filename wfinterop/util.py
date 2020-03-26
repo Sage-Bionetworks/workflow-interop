@@ -14,7 +14,7 @@ import subprocess32
 import datetime as dt
 
 from contextlib import contextmanager
-from urllib import urlopen
+from urllib.request import urlopen
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
