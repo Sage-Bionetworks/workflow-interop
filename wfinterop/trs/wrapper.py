@@ -16,11 +16,11 @@ def _format_workflow_id(id):
 
     :param str id:
     """
-    id = urllib.unquote(id)
+    id = urllib.parse.unquote(id)
     if not re.search('^#workflow', id):
-        return urllib.quote_plus('#workflow/{}'.format(id))
+        return urllib.parse.quote_plus('#workflow/{}'.format(id))
     else:
-        return urllib.quote_plus(id)
+        return urllib.parse.quote_plus(id)
 
 
 class TRS(object):
