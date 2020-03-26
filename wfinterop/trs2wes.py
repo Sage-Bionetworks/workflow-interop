@@ -11,11 +11,11 @@ import urllib
 import json
 import re
 import glob
+from io import StringIO
 import subprocess32
 
 import schema_salad.ref_resolver
 
-from StringIO import StringIO
 from toil.wdl import wdl_parser
 from wes_service.util import visit
 
