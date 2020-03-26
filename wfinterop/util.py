@@ -125,7 +125,7 @@ def get_yaml(filepath):
     """
     try:
         with open_file(filepath, 'r') as f:
-            return yaml.load(f)
+            return yaml.load(f, Loader=yaml.FullLoader)
     except IOError:
         logger.exception("No file found.  Please create: %s." % filepath)
 
