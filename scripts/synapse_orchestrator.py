@@ -44,6 +44,15 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
         sub = self.syn.getSubmission(submission)
         job = run_workflow(sub.filePath)
         print(job)
+        is_valid = job['status'] != "EXECUTOR_ERROR"
+        logs = orchestrator.get_run_log(run_id=job['run_id'],
+                                        wes_id='local')
+        submission_info = {'valid': is_valid,
+                           'error': job['status'],
+                           'annotations': {'test': 'testing'},
+                           'message': logs}
+        print(submission_info)
+        return submission_info
 
     def notify(self, submission, submission_info):
         pass
