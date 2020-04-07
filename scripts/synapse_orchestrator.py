@@ -42,7 +42,7 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
     def interaction_func(self, submission, **kwargs):
         # Download submission
         sub = self.syn.getSubmission(submission)
-        run_workflow(sub.path)
+        run_workflow(sub.filePath)
 
     def notify(self, submission, submission_info):
         pass
