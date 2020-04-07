@@ -43,3 +43,10 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
         # Download submission
         sub = self.syn.getSubmission(submission)
         run_workflow(sub.path)
+
+
+EVALUATION_QUEUES_CONFIG = [
+    {'id': 9614423,
+     'func': SynapseOrchestrator,
+     'kwargs': {'goldstandard_path': 'path/to/sc1gold.txt'}
+]
