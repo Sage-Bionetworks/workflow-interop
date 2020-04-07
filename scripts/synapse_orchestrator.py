@@ -52,7 +52,7 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
             stderr, stdout = orchestrator.get_run_log(run_id=job['run_id'],
                                                       wes_id='local')
         except Exception as err:
-            stderr = err
+            stderr = str(err)
 
         submission_info = {'valid': is_valid,
                            'error': job['status'],
