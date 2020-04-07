@@ -48,5 +48,5 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
 EVALUATION_QUEUES_CONFIG = [
     {'id': 9614423,
      'func': SynapseOrchestrator,
-     'kwargs': {'goldstandard_path': 'path/to/sc1gold.txt'}
+     'kwargs': {'goldstandard_path': 'path/to/sc1gold.txt'}}
 ]
