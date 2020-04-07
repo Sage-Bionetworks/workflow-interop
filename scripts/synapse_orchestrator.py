@@ -44,6 +44,9 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
         sub = self.syn.getSubmission(submission)
         run_workflow(sub.path)
 
+    def notify(self, submission, submission_info):
+        pass
+
 
 EVALUATION_QUEUES_CONFIG = [
     {'id': 9614423,
