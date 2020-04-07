@@ -30,9 +30,9 @@ LOGGER.setLevel(logging.INFO)
 #                           wes_id='local')
 
 def run_workflow(workflow_input_json):
-    orchestrator.run_job(queue_id='test_cwl_queue',
-                         wes_id='local',
-                         wf_jsonyaml="file://" + workflow_input_json)
+    job = orchestrator.run_job(queue_id='test_cwl_queue',
+                               wes_id='local',
+                               wf_jsonyaml="file://" + workflow_input_json)
 
 
 class SynapseOrchestrator(EvaluationQueueProcessor):
@@ -42,7 +42,8 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
     def interaction_func(self, submission, **kwargs):
         # Download submission
         sub = self.syn.getSubmission(submission)
-        run_workflow(sub.filePath)
+        job = run_workflow(sub.filePath)
+        print(job)
 
     def notify(self, submission, submission_info):
         pass

@@ -50,7 +50,6 @@ def run_job(queue_id,
     if wf_config['workflow_url'] is None:
         wf_config = fetch_queue_workflow(queue_id)
     wf_attachments = wf_config['workflow_attachments']
-    print(wf_attachments)
     if add_attachments is not None:
         wf_attachments += add_attachments
         wf_attachments = list(set(wf_attachments))
@@ -64,7 +63,6 @@ def run_job(queue_id,
     request = {'workflow_url': wf_config['workflow_url'],
                'workflow_params': wf_jsonyaml,
                'attachment': wf_attachments}
-    print(request)
     parts = []
     if opts is not None:
         parts = build_wes_request(
