@@ -32,7 +32,7 @@ LOGGER.setLevel(logging.INFO)
 def run_workflow(workflow_input_json):
     orchestrator.run_job(queue_id='test_cwl_queue',
                          wes_id='local',
-                         wf_jsonyaml=workflow_input_json)
+                         wf_jsonyaml="file:/" + workflow_input_json)
 
 
 class SynapseOrchestrator(EvaluationQueueProcessor):
