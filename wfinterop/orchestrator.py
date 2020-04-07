@@ -50,6 +50,7 @@ def run_job(queue_id,
     if wf_config['workflow_url'] is None:
         wf_config = fetch_queue_workflow(queue_id)
     wf_attachments = wf_config['workflow_attachments']
+    print(wf_attachments)
     if add_attachments is not None:
         wf_attachments += add_attachments
         wf_attachments = list(set(wf_attachments))
