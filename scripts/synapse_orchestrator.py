@@ -45,14 +45,14 @@ class SynapseOrchestrator(EvaluationQueueProcessor):
         job = run_workflow(sub.filePath)
         print(job)
         is_valid = job['status'] != "EXECUTOR_ERROR"
-        stderr, stdout = orchestrator.get_run_log(run_id=job['run_id'],
-                                                  wes_id='local')
-        print(stderr)
-        print(stdout)
+        # stderr, stdout = orchestrator.get_run_log(run_id=job['run_id'],
+        #                                           wes_id='local')
+        # print(stderr)
+        # print(stdout)
         submission_info = {'valid': is_valid,
                            'error': job['status'],
                            'annotations': {'test': 'testing'},
-                           'message': stderr + stdout}
+                           'message': "INVALID"}
         print(submission_info)
         return submission_info
 
