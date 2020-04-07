@@ -33,7 +33,7 @@ def run_workflow(workflow_input_json):
     job = orchestrator.run_job(queue_id='test_cwl_queue',
                                wes_id='local',
                                wf_jsonyaml="file://" + workflow_input_json)
-
+    return job
 
 class SynapseOrchestrator(EvaluationQueueProcessor):
     _status = "RECEIVED"
