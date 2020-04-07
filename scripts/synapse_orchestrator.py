@@ -18,7 +18,7 @@ logging.basicConfig(format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
-
+# TODO: Need to configure this so it isn't relative path
 # config.add_queue(queue_id='demo_queue',
 #                  wf_type='CWL',
 #                  wf_id='github.com/dockstore-testing/md5sum-checker',
