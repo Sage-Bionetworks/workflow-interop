@@ -96,7 +96,7 @@ def run_job(queue_id: str,
         run_log['start_time'] = dt.datetime.now().ctime()
         time.sleep(10)
         run_status = wes_instance.get_run_status(run_log['run_id'])['state']
-        sub_status = 'ACCEPTED'
+        sub_status = 'EVALUATION_IN_PROGRESS'
     run_log['status'] = run_status
 
     # TODO: Add this back in later
@@ -136,8 +136,8 @@ def run_submission(queue_id: str, submission_id: str, wes_id: str=None,
                       wf_jsonyaml="file://" + wf_jsonyaml,
                       submission=True,
                       opts=opts)
-
-    update_submission(syn, submission_id, run_log, 'ACCEPTED')
+    print(run_log)
+    update_submission(syn, submission_id, run_log, 'EVALUATION_IN_PROGRESS')
     return run_log
 
 
