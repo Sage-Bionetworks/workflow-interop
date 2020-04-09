@@ -25,7 +25,7 @@ from wfinterop.synapse_queue import get_submission_bundle
 from wfinterop.synapse_queue import get_submissions
 from wfinterop.synapse_queue import create_submission
 from wfinterop.synapse_queue import update_submission
-import synapseclient.login()
+import synapseclient
 
 
 logging.basicConfig(level=logging.DEBUG)
