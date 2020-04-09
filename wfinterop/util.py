@@ -12,7 +12,7 @@ import yaml
 import subprocess32
 
 import datetime as dt
-import challengeutils
+from challengeutils.utils import update_single_submission_status
 
 from contextlib import contextmanager
 from urllib.request import urlopen
@@ -235,8 +235,8 @@ def annotate_submission(syn, submissionid, annotation_dict=None,
     # Don't add any annotations that are None
     annotation_dict = {key: annotation_dict[key] for key in annotation_dict
                        if annotation_dict[key] is not None}
-    status = challengeutils.utils.update_single_submission_status(status, annotation_dict,
-                                                                  is_private=is_private,
-                                                                  force=force)
+    status = update_single_submission_status(status, annotation_dict,
+                                             is_private=is_private,
+                                             force=force)
     status = syn.store(status)
     return status
