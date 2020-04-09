@@ -87,6 +87,8 @@ def update_submission(syn, submission_id: str, value: dict, status: str):
         status: Submission status
 
     """
+    print(value)
+    print(status)
     _with_retry(lambda: annotate_submission(syn, submission_id,
                                             value, status),
                 wait=3,
