@@ -217,6 +217,11 @@ def convert_timedelta(duration):
     return '{}h:{}m:{}s'.format(hours, minutes, seconds)
 
 
+class mock_response:
+    """Mocked status code to return"""
+    status_code = 200
+
+
 def annotate_submission(syn, submissionid, annotation_dict=None,
                         status=None,
                         is_private=True, force=False):
@@ -230,13 +235,14 @@ def annotate_submission(syn, submissionid, annotation_dict=None,
         force: Force change the annotation from
                private to public and vice versa.
     """
-    status = syn.getSubmissionStatus(submissionid)
-    status.status = status
+    sub_status = syn.getSubmissionStatus(submissionid)
+    sub_status.status = status
     # Don't add any annotations that are None
     annotation_dict = {key: annotation_dict[key] for key in annotation_dict
                        if annotation_dict[key] is not None}
-    status = update_single_submission_status(status, annotation_dict,
-                                             is_private=is_private,
-                                             force=force)
-    status = syn.store(status)
-    return status
+    sub_status = update_single_submission_status(sub_status, annotation_dict,
+                                                 is_private=is_private,
+                                                 force=force)
+    print(sub_status)
+    sub_status = syn.store(sub_status)
+    return mock_response

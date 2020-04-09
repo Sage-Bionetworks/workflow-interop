@@ -94,6 +94,7 @@ def run_job(queue_id: str,
         logger.info("Job received by WES '{}', run ID: {}"
                     .format(wes_id, run_log['run_id']))
         run_log['start_time'] = dt.datetime.now().ctime()
+        # TODO: Why the sleep here?
         time.sleep(10)
         run_status = wes_instance.get_run_status(run_log['run_id'])['state']
         sub_status = 'EVALUATION_IN_PROGRESS'
@@ -136,7 +137,7 @@ def run_submission(queue_id: str, submission_id: str, wes_id: str=None,
                       wf_jsonyaml="file://" + wf_jsonyaml,
                       submission=True,
                       opts=opts)
-    print(run_log)
+
     update_submission(syn, submission_id, run_log, 'EVALUATION_IN_PROGRESS')
     return run_log
 
@@ -152,8 +153,9 @@ def run_queue(queue_id, wes_id=None, opts=None):
     queue_log = {}
     for submission_id in get_submissions(syn, queue_id, status='RECEIVED'):
         submission = get_submission_bundle(syn, submission_id)
-        if submission['wes_id'] is not None:
-            wes_id = submission['wes_id']
+        # TODO: Add back in
+        # if submission['wes_id'] is not None:
+        #     wes_id = submission['wes_id']
         run_log = run_submission(queue_id=queue_id,
                                  submission_id=submission_id,
                                  wes_id=wes_id,

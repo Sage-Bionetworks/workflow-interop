@@ -289,4 +289,6 @@ synapseorchestrator.run_job(queue_id=9614423,
                             wf_jsonyaml='file://input.json')
 synapseorchestrator.run_submission(queue_id=9614423,
                                    submission_id=9702899, wes_id='local')
+synapseorchestrator.run_queue(queue_id=9614423,
+                              wes_id='local')
 ```

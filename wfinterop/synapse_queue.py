@@ -48,7 +48,7 @@ def get_submissions(syn, queue_id,
         list: List of submission ids
 
     """
-    submissions = syn.getSubmissionBundle(queue_id, status=status)
+    submissions = syn.getSubmissionBundles(queue_id, status=status)
     # submissions = get_json(submission_queue)
     # if not exclude_status:
     #     status = [s for s in status if s not in exclude_status]
@@ -87,8 +87,6 @@ def update_submission(syn, submission_id: str, value: dict, status: str):
         status: Submission status
 
     """
-    print(value)
-    print(status)
     _with_retry(lambda: annotate_submission(syn, submission_id,
                                             value, status),
                 wait=3,
