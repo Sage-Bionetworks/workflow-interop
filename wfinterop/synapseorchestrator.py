@@ -99,8 +99,9 @@ def run_job(queue_id: str,
         sub_status = 'ACCEPTED'
     run_log['status'] = run_status
 
-    if not submission:
-        update_submission(syn, submission_id, run_log, sub_status)
+    # TODO: Add this back in later
+    # if not submission:
+    #     update_submission(syn, submission_id, run_log, sub_status)
     return run_log
 
 

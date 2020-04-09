@@ -286,3 +286,8 @@ orchestrator.run_job(queue_id='test_cwl_queue',
 pip3 install challengeutils
 python3 /home/tyu/.local/bin/runqueue.py scripts/synapse_orchestrator.py
 ```
+
+
+
+#### Synapse Orchestration
+
