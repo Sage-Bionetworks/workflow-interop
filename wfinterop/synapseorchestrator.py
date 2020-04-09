@@ -137,8 +137,7 @@ def run_submission(queue_id: str, submission_id: str, wes_id: str=None,
                       submission=True,
                       opts=opts)
 
-    update_submission(queue_id, submission_id, run_log, 'ACCEPTED')
-    # update_submission(queue_id, submission_id, 'status', 'SUBMITTED')
+    update_submission(syn, submission_id, run_log, 'ACCEPTED')
     return run_log
 
 
@@ -201,7 +200,7 @@ def monitor_queue(queue_id):
         run_log['status'] = run_status['state']
         run_log['elapsed_time'] = etime
 
-        update_submission(queue_id, sub_id, 'run_log', run_log)
+        update_submission(syn, sub_id, 'run_log', run_log)
 
         if run_log['status'] == 'COMPLETE':
             wf_config = queue_config()[queue_id]
@@ -210,7 +209,7 @@ def monitor_queue(queue_id):
                 # store_verification(wf_config['target_queue'],
                 #                    submission['wes_id'])
                 sub_status = 'VALIDATED'
-            update_submission(queue_id, sub_id, 'status', sub_status)
+            update_submission(syn, sub_id, 'status', sub_status)
 
         queue_log[sub_id] = run_log
 

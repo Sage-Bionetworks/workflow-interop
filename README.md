@@ -280,14 +280,13 @@ orchestrator.run_job(queue_id='test_cwl_queue',
 ```
 
 
-#### Usage with Simple Synapse Orchestrator
-
-```
-pip3 install challengeutils
-python3 /home/tyu/.local/bin/runqueue.py scripts/synapse_orchestrator.py
-```
-
-
-
 #### Synapse Orchestration
 
+```python
+from wfinterop import synapseorchestrator
+synapseorchestrator.run_job(queue_id=9614423,
+                            wes_id='local',
+                            wf_jsonyaml='file://input.json')
+synapseorchestrator.run_submission(queue_id=9614423,
+                                   submission_id=9702899, wes_id='local')
+```
