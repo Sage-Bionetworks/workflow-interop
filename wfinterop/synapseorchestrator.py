@@ -187,19 +187,19 @@ def monitor_queue(queue_id):
         #     queue_log[sub_id] = {'status': 'PENDING'}
         #     continue
 
-        if run_log['run_id'] == 'failed':
-            queue_log[sub_id] = {'status': 'FAILED'}
-            continue
+        # if run_log['run_id'] == 'failed':
+        #     queue_log[sub_id] = {'status': 'FAILED'}
+        #     continue
         # run_log['wes_id'] = submission['wes_id']
         # TODO: this shouldn't be hard coded
         run_log['wes_id'] = 'local'
 
         # TODO: SWITCH THIS TO INVALID, ACCEPTED...
-        if run_log['status'] in ['COMPLETE', 'CANCELLED', 'EXECUTOR_ERROR']:
-            queue_log[sub_id] = run_log
-            continue
+        # if run_log['status'] in ['COMPLETE', 'CANCELLED', 'EXECUTOR_ERROR']:
+        #     queue_log[sub_id] = run_log
+        #     continue
 
-        wes_instance = WES(submission['wes_id'])
+        wes_instance = WES(run_log['wes_id'])
         run_status = wes_instance.get_run_status(run_log['run_id'])
 
         if run_status['state'] in ['QUEUED', 'INITIALIZING', 'RUNNING']:
