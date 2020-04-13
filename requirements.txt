@@ -1,4 +1,4 @@
--e https://github.com/common-workflow-language/workflow-service#egg=wes-service
+-e git+https://github.com/common-workflow-language/workflow-service#egg=wes-service
 pandas
 IPython==5.8.0
 future
