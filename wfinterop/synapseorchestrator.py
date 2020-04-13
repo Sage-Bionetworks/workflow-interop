@@ -194,9 +194,11 @@ def monitor_queue(queue_id):
         # TODO: this shouldn't be hard coded
         run_log['wes_id'] = 'local'
 
+        # TODO: SWITCH THIS TO INVALID, ACCEPTED...
         if run_log['status'] in ['COMPLETE', 'CANCELLED', 'EXECUTOR_ERROR']:
             queue_log[sub_id] = run_log
             continue
+
         wes_instance = WES(submission['wes_id'])
         run_status = wes_instance.get_run_status(run_log['run_id'])
 
@@ -217,12 +219,34 @@ def monitor_queue(queue_id):
 
         if run_log['status'] == 'COMPLETE':
             wf_config = queue_config()[queue_id]
-            sub_status = run_log['status']
+            # sub_status = run_log['status']
+            sub_status = "ACCEPTED"
             if wf_config['target_queue']:
                 # store_verification(wf_config['target_queue'],
                 #                    submission['wes_id'])
                 sub_status = 'VALIDATED'
             update_submission(syn, sub_id, run_log, status=sub_status)
+
+        if run_log['status'] in ['CANCELLED', 'EXECUTOR_ERROR']:
+            wf_config = queue_config()[queue_id]
+            # TODO: differentiate between CANCELLED and EXECUTOR_ERROR
+            if run_log['status'] == "CANCELLED":
+                sub_status = "CLOSED"
+            else:
+                sub_status = "INVALID"
+                run_log['stderr'] = str(
+                    wes_instance.get_run_stderr(run_log['run_id'])
+                )
+                run_log['stdout'] = str(
+                    wes_instance.get_run_stdout(run_log['run_id'])
+                )
+
+            if wf_config['target_queue']:
+                # store_verification(wf_config['target_queue'],
+                #                    submission['wes_id'])
+                sub_status = 'VALIDATED'
+            update_submission(syn, sub_id, run_log, status=sub_status)
+
 
         queue_log[sub_id] = run_log
 
