@@ -25,7 +25,9 @@ from wfinterop.synapse_queue import get_submission_bundle
 from wfinterop.synapse_queue import get_submissions
 from wfinterop.synapse_queue import create_submission
 from wfinterop.synapse_queue import update_submission
+
 import synapseclient
+from synapseclient.annotations import from_submission_status_annotations
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -174,13 +176,16 @@ def monitor_queue(queue_id):
     """
     current = dt.datetime.now()
     queue_log = {}
-    for sub_id in get_submissions(syn, queue_id=queue_id):
+    # TODO: limitation of get_submissions of only being to get
+    # one type of submission
+    for sub_id in get_submissions(syn, queue_id=queue_id,
+                                  status="EVALUATION_IN_PROGRESS"):
         submission = get_submission_bundle(syn, submission_id=sub_id)
         sub_status = submission['submissionStatus']
-        run_log = synapseclient.annotations.from_submission_status_annotations(sub_status.annotations)
-        if sub_status.status == 'RECEIVED':
-            queue_log[sub_id] = {'status': 'PENDING'}
-            continue
+        run_log = from_submission_status_annotations(sub_status.annotations)
+        # if sub_status.status == 'RECEIVED':
+        #     queue_log[sub_id] = {'status': 'PENDING'}
+        #     continue
 
         if run_log['run_id'] == 'failed':
             queue_log[sub_id] = {'status': 'FAILED'}
@@ -189,7 +194,7 @@ def monitor_queue(queue_id):
         # TODO: this shouldn't be hard coded
         run_log['wes_id'] = 'local'
 
-        if run_log['status'] in ['COMPLETE', 'CANCELED', 'EXECUTOR_ERROR']:
+        if run_log['status'] in ['COMPLETE', 'CANCELLED', 'EXECUTOR_ERROR']:
             queue_log[sub_id] = run_log
             continue
         wes_instance = WES(submission['wes_id'])

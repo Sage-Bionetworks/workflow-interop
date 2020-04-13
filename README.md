@@ -291,4 +291,6 @@ synapseorchestrator.run_submission(queue_id=9614423,
                                    submission_id=9702899, wes_id='local')
 synapseorchestrator.run_queue(queue_id=9614423,
                               wes_id='local')
+synapseorchestrator.monitor_queue(queue_id=9614423,
+                              wes_id='local')
 ```
