@@ -303,11 +303,3 @@ def monitor():
     except KeyboardInterrupt:
         print("\nDone")
         return
-
-
-def get_run_log(wes_id, run_id):
-    """Gets a workflows run logs"""
-    wes_instance = WES(wes_id)
-    stderr = wes_instance.get_run_stderr(run_id)
-    stdout = wes_instance.get_run_stdout(run_id)
-    return stderr, stdout
