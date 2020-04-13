@@ -3,5 +3,3 @@ pandas
 IPython==5.8.0
 future
 bravado
-toil
-connexion==2.6.0
