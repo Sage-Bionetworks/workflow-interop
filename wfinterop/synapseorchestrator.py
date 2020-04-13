@@ -235,12 +235,19 @@ def monitor_queue(queue_id):
                 sub_status = "CLOSED"
             else:
                 sub_status = "INVALID"
-                run_log['stderr'] = str(
-                    wes_instance.get_run_stderr(run_log['run_id'])
-                )
-                run_log['stdout'] = str(
-                    wes_instance.get_run_stdout(run_log['run_id'])
-                )
+                stderr = ''
+                stdout = ''
+                try:
+                    stderr = wes_instance.get_run_stderr(run_log['run_id'])
+                except Exception as err:
+                    stderr = str(err)
+                try:
+                    stdout = wes_instance.get_run_stdout(run_log['run_id'])
+                except Exception as err:
+                    stdout = str(err)
+
+                run_log['stderr'] = stderr
+                run_log['stdout'] = stdout
 
             if wf_config['target_queue']:
                 # store_verification(wf_config['target_queue'],
