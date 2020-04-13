@@ -89,7 +89,8 @@ def update_submission(syn, submission_id: str, value: dict,
 
     """
     _with_retry(lambda: annotate_submission(syn, submission_id,
-                                            value, status=status),
+                                            value, status=status,
+                                            is_private=False),
                 wait=3,
                 retries=10,
                 retry_status_codes=[412, 429, 500, 502, 503, 504],

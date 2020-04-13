@@ -182,6 +182,7 @@ def monitor_queue(queue_id):
                                   status="EVALUATION_IN_PROGRESS"):
         submission = get_submission_bundle(syn, submission_id=sub_id)
         sub_status = submission['submissionStatus']
+
         run_log = from_submission_status_annotations(sub_status.annotations)
         # if sub_status.status == 'RECEIVED':
         #     queue_log[sub_id] = {'status': 'PENDING'}
