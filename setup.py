@@ -9,18 +9,16 @@ except ImportError:
 
 long_description = ''
 
-install_requires = []
-with open('requirements.txt') as requirements_file:
-    for line in requirements_file:
-        line = line.strip()
-        if len(line) == 0:
-            continue
-        if line[0] == '#':
-            continue
-        if line.startswith("-e"):
-            pinned_version = line.split("egg=")[1]
-        pinned_version = line.split()[0]
-        install_requires.append(pinned_version)
+# install_requires = []
+# with open('requirements.txt') as requirements_file:
+#     for line in requirements_file:
+#         line = line.strip()
+#         if len(line) == 0:
+#             continue
+#         if line[0] == '#':
+#             continue
+#         pinned_version = line.split()[0]
+#         install_requires.append(pinned_version)
 
 setup(
     name='workflow-interop',
@@ -35,7 +33,7 @@ setup(
     url='https://github.com/Sage-Bionetworks/workflow-interop',
     download_url='https://github.com/Sage-Bionetworks/workflow-interop',
     long_description=long_description,
-    install_requires=install_requires,
+    install_requires=['wes-service', 'pandas', 'IPython', 'future', 'bravado'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest', 'pytest-cov', 'mock'],
     license='Apache 2.0',
