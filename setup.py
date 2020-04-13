@@ -17,6 +17,8 @@ with open('requirements.txt') as requirements_file:
             continue
         if line[0] == '#':
             continue
+        if line.startswith("-e"):
+            pinned_version = line.split("egg=")[1]
         pinned_version = line.split()[0]
         install_requires.append(pinned_version)
 
