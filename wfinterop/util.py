@@ -236,7 +236,8 @@ def annotate_submission(syn, submissionid, annotation_dict=None,
                private to public and vice versa.
     """
     sub_status = syn.getSubmissionStatus(submissionid)
-    sub_status.status = status
+    if status is not None:
+        sub_status.status = status
     # Don't add any annotations that are None
     annotation_dict = {key: annotation_dict[key] for key in annotation_dict
                        if annotation_dict[key] is not None}

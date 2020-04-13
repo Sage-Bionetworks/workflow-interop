@@ -77,7 +77,8 @@ def get_submission_bundle(syn, submission_id: str) -> dict:
     return bundle
 
 
-def update_submission(syn, submission_id: str, value: dict, status: str):
+def update_submission(syn, submission_id: str, value: dict,
+                      status: str = None):
     """
     Update the status of a submission.
 
@@ -88,7 +89,7 @@ def update_submission(syn, submission_id: str, value: dict, status: str):
 
     """
     _with_retry(lambda: annotate_submission(syn, submission_id,
-                                            value, status),
+                                            value, status=status),
                 wait=3,
                 retries=10,
                 retry_status_codes=[412, 429, 500, 502, 503, 504],

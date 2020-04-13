@@ -151,7 +151,7 @@ def run_queue(queue_id, wes_id=None, opts=None):
     :param dict opts:
     """
     queue_log = {}
-    for submission_id in get_submissions(syn, queue_id, status='RECEIVED'):
+    for submission_id in get_submissions(syn, queue_id=queue_id, status='RECEIVED'):
         submission = get_submission_bundle(syn, submission_id)
         # TODO: Add back in
         # if submission['wes_id'] is not None:
@@ -174,16 +174,21 @@ def monitor_queue(queue_id):
     """
     current = dt.datetime.now()
     queue_log = {}
-    for sub_id in get_submissions(queue_id=queue_id):
-        submission = get_submission_bundle(queue_id, sub_id)
-        if submission['status'] == 'RECEIVED':
+    for sub_id in get_submissions(syn, queue_id=queue_id):
+        submission = get_submission_bundle(syn, submission_id=sub_id)
+        sub_status = submission['submissionStatus']
+        run_log = synapseclient.annotations.from_submission_status_annotations(sub_status.annotations)
+        if sub_status.status == 'RECEIVED':
             queue_log[sub_id] = {'status': 'PENDING'}
             continue
-        run_log = submission['run_log']
+
         if run_log['run_id'] == 'failed':
             queue_log[sub_id] = {'status': 'FAILED'}
             continue
-        run_log['wes_id'] = submission['wes_id']
+        # run_log['wes_id'] = submission['wes_id']
+        # TODO: this shouldn't be hard coded
+        run_log['wes_id'] = 'local'
+
         if run_log['status'] in ['COMPLETE', 'CANCELED', 'EXECUTOR_ERROR']:
             queue_log[sub_id] = run_log
             continue
@@ -201,8 +206,9 @@ def monitor_queue(queue_id):
 
         run_log['status'] = run_status['state']
         run_log['elapsed_time'] = etime
+        # update_submission(syn, submission_id, run_log, 'EVALUATION_IN_PROGRESS')
 
-        update_submission(syn, sub_id, 'run_log', run_log)
+        update_submission(syn, sub_id, run_log)
 
         if run_log['status'] == 'COMPLETE':
             wf_config = queue_config()[queue_id]
@@ -211,7 +217,7 @@ def monitor_queue(queue_id):
                 # store_verification(wf_config['target_queue'],
                 #                    submission['wes_id'])
                 sub_status = 'VALIDATED'
-            update_submission(syn, sub_id, 'status', sub_status)
+            update_submission(syn, sub_id, run_log, status=sub_status)
 
         queue_log[sub_id] = run_log
 
