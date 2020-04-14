@@ -26,7 +26,6 @@ from wfinterop.synapse_queue import get_submissions
 from wfinterop.synapse_queue import create_submission
 from wfinterop.synapse_queue import update_submission
 
-import synapseclient
 from synapseclient.exceptions import SynapseHTTPError
 from synapseclient.annotations import from_submission_status_annotations
 
