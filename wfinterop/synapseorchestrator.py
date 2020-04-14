@@ -230,7 +230,7 @@ def monitor_queue(queue_id):
 
         if run_log['status'] in ['CANCELLED', 'EXECUTOR_ERROR']:
             wf_config = queue_config()[queue_id]
-            # TODO: differentiate between CANCELLED and EXECUTOR_ERROR
+            # Differentiate between CANCELLED and EXECUTOR_ERROR
             if run_log['status'] == "CANCELLED":
                 sub_status = "CLOSED"
             else:
