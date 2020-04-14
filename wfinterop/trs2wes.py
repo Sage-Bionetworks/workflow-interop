@@ -114,6 +114,9 @@ def get_version(extension, workflow_file):
         try:
             with open_file(workflow_file, 'r') as f:
                 wf_lines = f.readlines()
+            # open_file returns bytes when passing in url
+            wf_lines = [l.decode("utf-8") if isinstance(l, bytes) else l
+                        for l in wf_lines]
             return [l.lstrip('version') for l in wf_lines
                     if 'version' in l.split(' ')][0]
         except IndexError:
@@ -187,30 +190,30 @@ def get_flattened_descriptor(workflow_file):
 
 
 def find_asts(ast_root, name):
-        """
-        Finds an AST node with the given name and the entire subtree
-        under it. Function borrowed from scottfrazer.
+    """
+    Finds an AST node with the given name and the entire subtree
+    under it. Function borrowed from scottfrazer.
 
-        Args:
-            ast_root: the WDL AST; the whole thing generally, but
-                really any portion that you wish to search
-            name (str): the name of the subtree you're looking for,
-                like 'Task'
+    Args:
+        ast_root: the WDL AST; the whole thing generally, but
+            really any portion that you wish to search
+        name (str): the name of the subtree you're looking for,
+            like 'Task'
 
-        Returns:
-            list: nodes representing the AST subtrees matching the
-            'name' given
-        """
-        nodes = []
-        if isinstance(ast_root, wdl_parser.AstList):
-            for node in ast_root:
-                nodes.extend(find_asts(node, name))
-        elif isinstance(ast_root, wdl_parser.Ast):
-            if ast_root.name == name:
-                nodes.append(ast_root)
-            for attr_name, attr in ast_root.attributes.items():
-                nodes.extend(find_asts(attr, name))
-        return nodes
+    Returns:
+        list: nodes representing the AST subtrees matching the
+        'name' given
+    """
+    nodes = []
+    if isinstance(ast_root, wdl_parser.AstList):
+        for node in ast_root:
+            nodes.extend(find_asts(node, name))
+    elif isinstance(ast_root, wdl_parser.Ast):
+        if ast_root.name == name:
+            nodes.append(ast_root)
+        for attr_name, attr in ast_root.attributes.items():
+            nodes.extend(find_asts(attr, name))
+    return nodes
 
 
 def get_wdl_inputs(wdl):
@@ -224,7 +227,9 @@ def get_wdl_inputs(wdl):
         dict: dict containing identified workflow inputs, classified
             and grouped by type (e.g., 'File')
     """
-    wdl_ast = wdl_parser.parse(wdl.encode('utf-8')).ast()
+    if isinstance(wdl, bytes):
+        wdl = wdl.decode("utf-8")
+    wdl_ast = wdl_parser.parse(wdl).ast()
     workflow = find_asts(wdl_ast, 'Workflow')[0]
     workflow_name = workflow.attr('name').source_string
     decs = find_asts(workflow, 'Declaration')
@@ -313,7 +318,10 @@ def get_wf_descriptor(workflow_file,
             descriptor_f = StringIO(get_packed_cwl(workflow_file))
         else:
             with open_file(workflow_file, 'rb') as f:
-                descriptor_f = StringIO(f.read())
+                workflow_str = f.read()
+                if isinstance(workflow_str, bytes):
+                    workflow_str = workflow_str.decode("utf-8")
+                descriptor_f = StringIO(workflow_str)
         descriptor_n = os.path.basename(workflow_file)
         parts.append(
             ("workflow_attachment", (descriptor_n, descriptor_f))
@@ -387,7 +395,10 @@ def get_wf_attachments(workflow_file, attachments, parts=None):
             attachment = attachment[7:]
 
         with open_file(attachment, 'rb') as f:
-            attach_f = StringIO(f.read())
+            content = f.read()
+            if isinstance(content, bytes):
+                content = content.decode('utf-8')
+            attach_f = StringIO(content)
 
         try:
             attach_path = re.sub(path_re.search(attachment).group() + '/',
