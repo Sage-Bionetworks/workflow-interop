@@ -14,21 +14,19 @@ import json
 import datetime as dt
 
 from IPython.display import display, clear_output
+from synapseclient.exceptions import SynapseHTTPError
+from synapseclient.annotations import from_submission_status_annotations
 
 from wfinterop.config import queue_config, wes_config
 from wfinterop.util import ctime2datetime, convert_timedelta
 from wfinterop.wes import WES
-from wfinterop.trs2wes import store_verification
+# from wfinterop.trs2wes import store_verification
 from wfinterop.trs2wes import build_wes_request
 from wfinterop.trs2wes import fetch_queue_workflow
 from wfinterop.synapse_queue import get_submission_bundle
 from wfinterop.synapse_queue import get_submissions
-from wfinterop.synapse_queue import create_submission
+# from wfinterop.synapse_queue import create_submission
 from wfinterop.synapse_queue import update_submission
-
-from synapseclient.exceptions import SynapseHTTPError
-from synapseclient.annotations import from_submission_status_annotations
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
