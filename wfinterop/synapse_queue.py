@@ -15,13 +15,14 @@ logger = logging.getLogger(__name__)
 
 # def create_queue(self):
 
-def create_submission(syn, queue_id: str, entity_id: str) -> str:
+def create_submission(syn: 'Synapse', queue_id: str, entity_id: str) -> str:
     """
     Submit a new job request to an evaluation queue.
 
     Both type and wf_name are optional but could be used with TRS.
 
     Args:
+        syn: Synapse connection
         queue_id: String identifying the workflow queue.
         entity_id: Entity id to submit
 
@@ -36,16 +37,17 @@ def create_submission(syn, queue_id: str, entity_id: str) -> str:
     return submission.id
 
 
-def get_submissions(syn, queue_id,
-                    status='RECEIVED'):
+def get_submissions(syn: 'Synapse', queue_id: str,
+                    status='RECEIVED') -> list:
     """Return all ids with the requested status.
 
     Args:
+        syn: Synapse connection.
         queue_id: String identifying the workflow queue.
-        status:
+        status: Status of submission to retrieve.
 
     Returns:
-        list: List of submission ids
+        List of submission ids
 
     """
     submissions = syn.getSubmissionBundles(queue_id, status=status)
@@ -59,34 +61,38 @@ def get_submissions(syn, queue_id,
         return []
 
 
-def get_submission_bundle(syn, submission_id: str) -> dict:
+def get_submission_bundle(syn: 'Synapse', submission_id: str) -> dict:
     """Return the submission's info.
+    # TODO: Expose this as an API call?
 
     Args:
+        syn: Synapse connection
         submission_id: Submission id
 
     Returns:
-        dict: SubmissionBundle - submission, submissionStatus
+        Submission bundle:
+        {'submission': {...},
+         'submissionStatus': {...}}
 
     """
     sub = syn.getSubmission(submission_id)
     status = syn.getSubmissionStatus(submission_id)
-    # TODO: possible to get wes_id here
+    # TODO: possible to get wes_id here (queue can be configured with wes_id)
     bundle = {'submission': sub,
               'submissionStatus': status}
     return bundle
 
 
-def update_submission(syn, submission_id: str, value: dict,
+def update_submission(syn: 'Synapse', submission_id: str, value: dict,
                       status: str = None):
     """
-    Update the status of a submission.
+    Update the status of a submission. Accounts for concurrent status updates
 
     Args:
+        syn: Synapse connection
         submission_id: Submission id
         value: annotation values in a dict
         status: Submission status
-
     """
     _with_retry(lambda: annotate_submission(syn, submission_id,
                                             value, status=status,

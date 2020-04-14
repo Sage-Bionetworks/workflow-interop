@@ -34,26 +34,28 @@ from synapseclient.annotations import from_submission_status_annotations
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# TODO: Add synapseclient.login() not as global
-# This is just for testing purposes
-syn = synapseclient.login()
-
 
 def run_job(queue_id: str,
             wes_id: str,
             wf_jsonyaml: str,
             opts: dict = None,
             add_attachments: list = None,
-            submission: bool = False):
+            submission: bool = False) -> dict:
     """Put a workflow in the queue and immmediately run it.
 
     Args:
         queue_id: String identifying the workflow queue.
-        wes_id:
-        wf_jsonyaml:
-        opts:
-        add_attachments:
-        submission:
+        wes_id: String identifying the WES id
+        wf_jsonyaml: Workflow file or json or yaml
+        opts: build_wes_request parameters
+        add_attachments: Attachment workflow tools
+        submission: Not used here, because would need to upload to Synapse
+                    to create a submission
+
+    Returns:
+        Run information of job
+        {'run_id':...
+         'status':...}
 
     """
     wf_config = queue_config()[queue_id]
@@ -85,7 +87,7 @@ def run_job(queue_id: str,
     if 'workflow_engine_parameters' in service_config:
         parts.append(('workflow_engine_parameters',
                       json.dumps(service_config['workflow_engine_parameters'])))
-    parts = parts if len(parts) else None
+    parts = parts if parts else None
 
     run_log = wes_instance.run_workflow(request, parts=parts)
     if run_log['run_id'] == 'failed':
@@ -109,16 +111,22 @@ def run_job(queue_id: str,
     return run_log
 
 
-def run_submission(queue_id: str, submission_id: str, wes_id: str = None,
-                   opts: dict = None):
+def run_submission(syn: 'Synapse', queue_id: str, submission_id: str,
+                   wes_id: str = None, opts: dict = None) -> dict:
     """For a single submission to a single evaluation queue, run
     the workflow in a single environment.
 
     Args:
+        syn: Synapse connection
         queue_id: String identifying the workflow queue.
-        submission_id:
-        wes_id:
-        opts:
+        submission_id: String identifying the submission.
+        wes_id: String identifying the WES id.
+        opts: run_job parameters
+
+    Returns:
+        Run information of submission
+        {'run_id':...
+         'status':...}
 
     """
     submission = get_submission_bundle(syn, submission_id)
@@ -156,13 +164,23 @@ def run_submission(queue_id: str, submission_id: str, wes_id: str = None,
     return run_log
 
 
-def run_queue(queue_id, wes_id=None, opts=None):
+def run_queue(syn: 'Synapse', queue_id: str, wes_id: str = None,
+              opts: dict = None) -> dict:
     """
     Run all submissions in a queue in a single environment.
 
-    :param str queue_id: String identifying the workflow queue.
-    :param str wes_id:
-    :param dict opts:
+    Args:
+        syn: Synapse connection
+        queue_id: String identifying the workflow queue.
+        wes_id: String identifying the WES id.
+        opts: run_submission parameters
+
+    Returns:
+        Run information for each submission started
+        {'submissionid': {'run_id':...
+                          'status':...},
+         ...}
+
     """
     queue_log = {}
     for submission_id in get_submissions(syn, queue_id=queue_id, status='RECEIVED'):
@@ -183,16 +201,28 @@ def run_queue(queue_id, wes_id=None, opts=None):
     return queue_log
 
 
-def monitor_queue(queue_id):
-    """
-    Update the status of all submissions for a queue.
+def monitor_queue(syn: 'Synapse', queue_id: str) -> dict:
+    """Update the status of all submissions for a queue.
 
-    :param str queue_id: String identifying the workflow queue.
+    Args:
+        syn: Synapse connection
+        queue_id: String identifying the workflow queue.
+
+    Returns:
+        updated information about each submission in a queue
+        {'submissionid': {'run_id':...,
+                          'status':...,
+                          'wes_id':...,
+                          'stderr':...,
+                          'stdout':...,
+                          'elapsed_time':...},
+         ...}
     """
     current = dt.datetime.now()
     queue_log = {}
     # TODO: limitation of get_submissions of only being to get
     # one type of submission
+    # TODO: Synapse submission status doesn't map directly into WES defined
     for sub_id in get_submissions(syn, queue_id=queue_id,
                                   status="EVALUATION_IN_PROGRESS"):
         submission = get_submission_bundle(syn, submission_id=sub_id)
@@ -249,6 +279,7 @@ def monitor_queue(queue_id):
                 sub_status = "CLOSED"
             else:
                 sub_status = "INVALID"
+                # TODO: put into own function
                 stderr = ''
                 stdout = ''
                 try:
@@ -277,6 +308,7 @@ def monitor_queue(queue_id):
 def monitor():
     """
     Monitor progress of workflow jobs.
+    # TODO: This currently doesn't work
     """
     import pandas as pd
     pd.set_option('display.width', 1000)
