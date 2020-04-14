@@ -27,6 +27,7 @@ from wfinterop.synapse_queue import create_submission
 from wfinterop.synapse_queue import update_submission
 
 import synapseclient
+from synapseclient.exceptions import SynapseHTTPError
 from synapseclient.annotations import from_submission_status_annotations
 
 
@@ -123,6 +124,17 @@ def run_submission(queue_id: str, submission_id: str, wes_id: str = None,
     submission = get_submission_bundle(syn, submission_id)
     sub = submission['submission']
     status = submission['submissionStatus']
+
+    try:
+        status.status = "EVALUATION_IN_PROGRESS"
+        # TODO: add in canCancel later
+        # status.canCancel = True
+        syn.store(status)
+    except SynapseHTTPError as err:
+        if err.response.status_code != 412:
+            raise err
+        return
+
     # if submission['wes_id'] is not None:
     #     wes_id = submission['wes_id']
     # TODO: Fix hard coded wes_id
@@ -140,7 +152,7 @@ def run_submission(queue_id: str, submission_id: str, wes_id: str = None,
                       submission=True,
                       opts=opts)
 
-    update_submission(syn, submission_id, run_log, 'EVALUATION_IN_PROGRESS')
+    update_submission(syn, submission_id, run_log)
     return run_log
 
 
@@ -154,7 +166,7 @@ def run_queue(queue_id, wes_id=None, opts=None):
     """
     queue_log = {}
     for submission_id in get_submissions(syn, queue_id=queue_id, status='RECEIVED'):
-        submission = get_submission_bundle(syn, submission_id)
+        # submission = get_submission_bundle(syn, submission_id)
         # TODO: Add back in
         # if submission['wes_id'] is not None:
         #     wes_id = submission['wes_id']
@@ -162,8 +174,11 @@ def run_queue(queue_id, wes_id=None, opts=None):
                                  submission_id=submission_id,
                                  wes_id=wes_id,
                                  opts=opts)
-        run_log['wes_id'] = wes_id
-        queue_log[submission_id] = run_log
+        if run_log is not None:
+            run_log['wes_id'] = wes_id
+            queue_log[submission_id] = run_log
+        else:
+            continue
 
     return queue_log
 
