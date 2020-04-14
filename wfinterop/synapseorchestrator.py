@@ -180,12 +180,14 @@ def run_queue(syn: 'Synapse', queue_id: str, wes_id: str = None,
 
     """
     queue_log = {}
-    for submission_id in get_submissions(syn, queue_id=queue_id, status='RECEIVED'):
+    for submission_id in get_submissions(syn=syn, queue_id=queue_id,
+                                         status='RECEIVED'):
         # submission = get_submission_bundle(syn, submission_id)
         # TODO: Add back in
         # if submission['wes_id'] is not None:
         #     wes_id = submission['wes_id']
-        run_log = run_submission(queue_id=queue_id,
+        run_log = run_submission(syn=syn,
+                                 queue_id=queue_id,
                                  submission_id=submission_id,
                                  wes_id=wes_id,
                                  opts=opts)
@@ -217,12 +219,12 @@ def monitor_queue(syn: 'Synapse', queue_id: str) -> dict:
     """
     current = dt.datetime.now()
     queue_log = {}
-    # TODO: limitation of get_submissions of only being to get
-    # one type of submission
+    # TODO: limitation of get_submissions of only being to get submission of
+    # one status or all submissions (not combination)
     # TODO: Synapse submission status doesn't map directly into WES defined
-    for sub_id in get_submissions(syn, queue_id=queue_id,
+    for sub_id in get_submissions(syn=syn, queue_id=queue_id,
                                   status="EVALUATION_IN_PROGRESS"):
-        submission = get_submission_bundle(syn, submission_id=sub_id)
+        submission = get_submission_bundle(syn=syn, submission_id=sub_id)
         sub_status = submission['submissionStatus']
 
         run_log = from_submission_status_annotations(sub_status.annotations)

@@ -33,13 +33,14 @@ def create_submission(syn: 'Synapse', queue_id: str, entity_id: str) -> str:
 
 
 def get_submissions(syn: 'Synapse', queue_id: str,
-                    status='RECEIVED') -> list:
+                    status: str = None) -> list:
     """Return all ids with the requested status.
 
     Args:
         syn: Synapse connection.
         queue_id: String identifying the workflow queue.
         status: Status of submission to retrieve.
+                One of: https://rest-docs.synapse.org/rest/org/sagebionetworks/evaluation/model/SubmissionStatusEnum.html
 
     Returns:
         List of submission ids
