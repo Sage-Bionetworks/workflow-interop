@@ -3,11 +3,7 @@
 Synapse Queue
 """
 import logging
-import os
-import datetime as dt
 
-from wfinterop.util import get_json, save_json, annotate_submission
-import synapseclient
 from synapseclient.retry import _with_retry
 
 logger = logging.getLogger(__name__)
