@@ -4,8 +4,9 @@ Synapse Queue
 """
 import logging
 
-from challengeutils.utils import annotate_submission
 from synapseclient.retry import _with_retry
+
+from .util import annotate_submission
 
 logger = logging.getLogger(__name__)
 # TODO: Create OrchestratorQueue and possibly extend submissions
