@@ -80,8 +80,8 @@ class WESAdapter(WESInterface):
     def RunWorkflow(self, request, parts=None):
         return self._wes_client.run(wf=request['workflow_url'],
                                     jsonyaml=request['workflow_params'],
-                                    attachments=request['attachment'],
-                                    parts=parts)
+                                    attachments=request['attachment'])
+                                    # parts=parts)
 
     def CancelRun(self, run_id):
         return self._wes_client.cancel(run_id=run_id)
