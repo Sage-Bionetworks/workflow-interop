@@ -11,9 +11,8 @@ import synapseclient
 from synapseclient.retry import _with_retry
 
 logger = logging.getLogger(__name__)
+# TODO: Create OrchestratorQueue and possibly extend submissions
 
-
-# def create_queue(self):
 
 def create_submission(syn: 'Synapse', queue_id: str, entity_id: str) -> str:
     """
