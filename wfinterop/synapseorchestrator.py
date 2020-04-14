@@ -41,9 +41,9 @@ syn = synapseclient.login()
 def run_job(queue_id: str,
             wes_id: str,
             wf_jsonyaml: str,
-            opts: dict=None,
-            add_attachments: list=None,
-            submission: bool=False):
+            opts: dict = None,
+            add_attachments: list = None,
+            submission: bool = False):
     """Put a workflow in the queue and immmediately run it.
 
     Args:
@@ -108,8 +108,8 @@ def run_job(queue_id: str,
     return run_log
 
 
-def run_submission(queue_id: str, submission_id: str, wes_id: str=None,
-                   opts: dict=None):
+def run_submission(queue_id: str, submission_id: str, wes_id: str = None,
+                   opts: dict = None):
     """For a single submission to a single evaluation queue, run
     the workflow in a single environment.
 
@@ -214,7 +214,6 @@ def monitor_queue(queue_id):
 
         run_log['status'] = run_status['state']
         run_log['elapsed_time'] = etime
-        # update_submission(syn, submission_id, run_log, 'EVALUATION_IN_PROGRESS')
 
         update_submission(syn, sub_id, run_log)
 
@@ -255,7 +254,6 @@ def monitor_queue(queue_id):
                 sub_status = 'VALIDATED'
             update_submission(syn, sub_id, run_log, status=sub_status)
 
-
         queue_log[sub_id] = run_log
 
     return queue_log
@@ -278,7 +276,7 @@ def monitor():
 
             for queue_id in queue_config():
                 queue_status = monitor_queue(queue_id)
-                if len(queue_status):
+                if queue_status:
                     statuses.append(queue_status)
                     print("\nWorkflow queue: {}".format(queue_id))
                     status_tracker = pd.DataFrame.from_dict(

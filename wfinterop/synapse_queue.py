@@ -20,7 +20,7 @@ def create_submission(syn, queue_id: str, entity_id: str) -> str:
     Submit a new job request to an evaluation queue.
 
     Both type and wf_name are optional but could be used with TRS.
-    
+
     Args:
         queue_id: String identifying the workflow queue.
         entity_id: Entity id to submit
@@ -32,7 +32,7 @@ def create_submission(syn, queue_id: str, entity_id: str) -> str:
     # TODO: This is more complex because we may have to store the file too?
     submission = syn.submit(evaluation=queue_id, entity=entity_id)
     logger.info(" Queueing job for '{}' endpoint:"
-                "\n - submission ID: {}".format(wes_id, submission.id))
+                "\n - submission ID: {}".format(queue_id, submission.id))
     return submission.id
 
 
