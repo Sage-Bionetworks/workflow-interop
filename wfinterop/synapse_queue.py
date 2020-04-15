@@ -53,8 +53,7 @@ def get_submissions(syn: 'Synapse', queue_id: str,
     # if not exclude_status:
     #     status = [s for s in status if s not in exclude_status]
     try:
-        return [sub.id for sub, sub_status in submissions
-                if sub_status.status == status]
+        return [sub.id for sub, sub_status in submissions]
     except KeyError:
         return []
 
@@ -91,7 +90,9 @@ def update_submission(syn: 'Synapse', submission_id: str, value: dict,
         submission_id: Submission id
         value: annotation values in a dict
         status: Submission status
+
     """
+    # TODO: No idea how to test this...
     _with_retry(lambda: annotate_submission(syn, submission_id,
                                             value, status=status,
                                             is_private=False,
