@@ -283,7 +283,7 @@ orchestrator.run_job(queue_id='test_cwl_queue',
 #### Synapse Orchestration
 
 ```python
-from wfinterop import synapseorchestrator
+from wfinterop import synapse_orchestrator
 from wfinterop import orchestrator
 import synapseclient
 syn = synapseclient.login()
@@ -292,9 +292,9 @@ orchestrator.run_job(queue_id=9614423,
                      wes_id='local',
                      wf_jsonyaml='file://input.json',
                      submission=True)
-synapseorchestrator.run_submission(syn, queue_id=9614423,
+synapse_orchestrator.run_submission(syn, queue_id=9614423,
                                    submission_id=9702899, wes_id='local')
-synapseorchestrator.run_queue(syn, queue_id=9614423,
+synapse_orchestrator.run_queue(syn, queue_id=9614423,
                               wes_id='local')
-synapseorchestrator.monitor_queue(syn, queue_id=9614423)
+synapse_orchestrator.monitor_queue(syn, queue_id=9614423)
 ```
