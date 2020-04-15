@@ -23,6 +23,7 @@ from wfinterop.wes import WES
 # from wfinterop.trs2wes import store_verification
 from wfinterop.trs2wes import build_wes_request
 from wfinterop.trs2wes import fetch_queue_workflow
+from wfinterop.orchestrator import run_job
 from wfinterop.synapse_queue import get_submission_bundle
 from wfinterop.synapse_queue import get_submissions
 # from wfinterop.synapse_queue import create_submission
@@ -32,80 +33,80 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def run_job(queue_id: str,
-            wes_id: str,
-            wf_jsonyaml: str,
-            opts: dict = None,
-            add_attachments: list = None,
-            submission: bool = False) -> dict:
-    """Put a workflow in the queue and immmediately run it.
+# def run_job(queue_id: str,
+#             wes_id: str,
+#             wf_jsonyaml: str,
+#             opts: dict = None,
+#             add_attachments: list = None,
+#             submission: bool = False) -> dict:
+#     """Put a workflow in the queue and immmediately run it.
 
-    Args:
-        queue_id: String identifying the workflow queue.
-        wes_id: String identifying the WES id
-        wf_jsonyaml: Workflow file or json or yaml
-        opts: build_wes_request parameters
-        add_attachments: Attachment workflow tools
-        submission: Not used here, because would need to upload to Synapse
-                    to create a submission
+#     Args:
+#         queue_id: String identifying the workflow queue.
+#         wes_id: String identifying the WES id
+#         wf_jsonyaml: Workflow file or json or yaml
+#         opts: build_wes_request parameters
+#         add_attachments: Attachment workflow tools
+#         submission: Not used here, because would need to upload to Synapse
+#                     to create a submission
 
-    Returns:
-        Run information of job
-        {'run_id':...
-         'status':...}
+#     Returns:
+#         Run information of job
+#         {'run_id':...
+#          'status':...}
 
-    """
-    wf_config = queue_config()[queue_id]
-    if wf_config['workflow_url'] is None:
-        wf_config = fetch_queue_workflow(queue_id)
-    wf_attachments = wf_config['workflow_attachments']
-    if add_attachments is not None:
-        wf_attachments += add_attachments
-        wf_attachments = list(set(wf_attachments))
+#     """
+#     wf_config = queue_config()[queue_id]
+#     if wf_config['workflow_url'] is None:
+#         wf_config = fetch_queue_workflow(queue_id)
+#     wf_attachments = wf_config['workflow_attachments']
+#     if add_attachments is not None:
+#         wf_attachments += add_attachments
+#         wf_attachments = list(set(wf_attachments))
 
-    # TODO: Remove this for now
-    # if not submission:
-    #     submission_id = create_submission(queue_id=queue_id,
-    #                                       submission_data=wf_jsonyaml,
-    #                                       wes_id=wes_id)
-    wes_instance = WES(wes_id)
-    service_config = wes_config()[wes_id]
-    request = {'workflow_url': wf_config['workflow_url'],
-               'workflow_params': wf_jsonyaml,
-               'attachment': wf_attachments}
-    parts = []
-    if opts is not None:
-        parts = build_wes_request(
-            workflow_file=request['workflow_url'],
-            jsonyaml=request['workflow_params'],
-            attachments=request['attachment'],
-            **opts
-        )
-    if 'workflow_engine_parameters' in service_config:
-        parts.append(('workflow_engine_parameters',
-                      json.dumps(service_config['workflow_engine_parameters'])))
-    parts = parts if parts else None
+#     # TODO: Remove this for now
+#     # if not submission:
+#     #     submission_id = create_submission(queue_id=queue_id,
+#     #                                       submission_data=wf_jsonyaml,
+#     #                                       wes_id=wes_id)
+#     wes_instance = WES(wes_id)
+#     service_config = wes_config()[wes_id]
+#     request = {'workflow_url': wf_config['workflow_url'],
+#                'workflow_params': wf_jsonyaml,
+#                'attachment': wf_attachments}
+#     parts = []
+#     if opts is not None:
+#         parts = build_wes_request(
+#             workflow_file=request['workflow_url'],
+#             jsonyaml=request['workflow_params'],
+#             attachments=request['attachment'],
+#             **opts
+#         )
+#     if 'workflow_engine_parameters' in service_config:
+#         parts.append(('workflow_engine_parameters',
+#                       json.dumps(service_config['workflow_engine_parameters'])))
+#     parts = parts if parts else None
 
-    run_log = wes_instance.run_workflow(request, parts=parts)
-    if run_log['run_id'] == 'failed':
-        logger.info("Job submission failed for WES '{}'"
-                    .format(wes_id))
-        run_status = 'FAILED'
-        sub_status = 'INVALID'
-    else:
-        logger.info("Job received by WES '{}', run ID: {}"
-                    .format(wes_id, run_log['run_id']))
-        run_log['start_time'] = dt.datetime.now().ctime()
-        # TODO: Why the sleep here?
-        time.sleep(10)
-        run_status = wes_instance.get_run_status(run_log['run_id'])['state']
-        sub_status = 'EVALUATION_IN_PROGRESS'
-    run_log['status'] = run_status
+#     run_log = wes_instance.run_workflow(request, parts=parts)
+#     if run_log['run_id'] == 'failed':
+#         logger.info("Job submission failed for WES '{}'"
+#                     .format(wes_id))
+#         run_status = 'FAILED'
+#         sub_status = 'INVALID'
+#     else:
+#         logger.info("Job received by WES '{}', run ID: {}"
+#                     .format(wes_id, run_log['run_id']))
+#         run_log['start_time'] = dt.datetime.now().ctime()
+#         # TODO: Why the sleep here?
+#         time.sleep(10)
+#         run_status = wes_instance.get_run_status(run_log['run_id'])['state']
+#         sub_status = 'EVALUATION_IN_PROGRESS'
+#     run_log['status'] = run_status
 
-    # TODO: Add this back in later
-    # if not submission:
-    #     update_submission(syn, submission_id, run_log, sub_status)
-    return run_log
+#     # TODO: Add this back in later
+#     # if not submission:
+#     #     update_submission(syn, submission_id, run_log, sub_status)
+#     return run_log
 
 
 def run_submission(syn: 'Synapse', queue_id: str, submission_id: str,
@@ -134,7 +135,7 @@ def run_submission(syn: 'Synapse', queue_id: str, submission_id: str,
         status.status = "EVALUATION_IN_PROGRESS"
         # TODO: add in canCancel later
         # status.canCancel = True
-        syn.store(status)
+        status = syn.store(status)
     except SynapseHTTPError as err:
         if err.response.status_code != 412:
             raise err
@@ -156,8 +157,10 @@ def run_submission(syn: 'Synapse', queue_id: str, submission_id: str,
                       wf_jsonyaml="file://" + wf_jsonyaml,
                       submission=True,
                       opts=opts)
-
-    update_submission(syn, submission_id, run_log)
+    # TODO: rename run['status'] later, it will collide with submission
+    # status.status
+    status = "INVALID" if run['status'] == "FAILED" else None
+    update_submission(syn, submission_id, run_log, status)
     return run_log
 
 
