@@ -186,7 +186,7 @@ def monitor_queue(syn: 'Synapse', queue_id: str) -> dict:
         run_log['status'] = run_status['state']
         run_log['elapsed_time'] = etime
 
-        update_submission(syn, sub_id, run_log)
+        update_submission(syn=syn, submission_id=sub_id, value=run_log)
 
         if run_log['status'] == 'COMPLETE':
             wf_config = queue_config()[queue_id]
@@ -196,7 +196,8 @@ def monitor_queue(syn: 'Synapse', queue_id: str) -> dict:
                 # store_verification(wf_config['target_queue'],
                 #                    submission['wes_id'])
                 sub_status = 'VALIDATED'
-            update_submission(syn, sub_id, run_log, status=sub_status)
+            update_submission(syn=syn, submission_id=sub_id, value=run_log,
+                              status=sub_status)
 
         if run_log['status'] in ['CANCELLED', 'EXECUTOR_ERROR']:
             wf_config = queue_config()[queue_id]
@@ -224,7 +225,8 @@ def monitor_queue(syn: 'Synapse', queue_id: str) -> dict:
                 # store_verification(wf_config['target_queue'],
                 #                    submission['wes_id'])
                 sub_status = 'VALIDATED'
-            update_submission(syn, sub_id, run_log, status=sub_status)
+            update_submission(syn=syn, submission_id=sub_id, value=run_log,
+                              status=sub_status)
 
         queue_log[sub_id] = run_log
 
