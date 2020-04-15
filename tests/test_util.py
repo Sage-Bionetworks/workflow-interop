@@ -1,8 +1,13 @@
+from datetime import datetime
 import logging
+from mock import Mock, patch
+
+from challengeutils import utils
 import pytest
 import yaml
 import textwrap
-from datetime import datetime
+import synapseclient
+
 from wfinterop import util
 
 logging.basicConfig(level=logging.DEBUG)
@@ -121,3 +126,30 @@ def test_convert_timedelta():
     test_string = util.convert_timedelta(mock_duration)
 
     assert(test_string == '1h:1m:0s')
+
+
+def test_annotate_submission(mock_syn):
+    sub_status = Mock(synapseclient.SubmissionStatus)
+    sub_status.status = "RECEIVED"
+
+
+    updated_status = Mock(synapseclient.SubmissionStatus)
+    updated_status.status = "SCORED"
+
+    with patch.object(mock_syn, "getSubmissionStatus",
+                      return_value=sub_status) as patch_get,\
+         patch.object(util, "update_single_submission_status",
+                      return_value=updated_status) as patch_update,\
+         patch.object(mock_syn, "store") as patch_store:
+        response = util.annotate_submission(mock_syn, 'subid_1',
+                                            annotation_dict={"test": "foo",
+                                                             "notnone": None},
+                                            status="SCORED",
+                                            is_private=False, force=True)
+        assert response.status_code == 200
+        patch_get.assert_called_once_with('subid_1')
+        sub_status.status = "SCORED"
+        patch_update.assert_called_once_with(sub_status, {'test': 'foo'},
+                                             is_private=False,
+                                             force=True)
+        patch_store.assert_called_once_with(updated_status)

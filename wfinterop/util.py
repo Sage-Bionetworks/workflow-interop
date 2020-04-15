@@ -244,5 +244,5 @@ def annotate_submission(syn, submissionid, annotation_dict=None,
     sub_status = update_single_submission_status(sub_status, annotation_dict,
                                                  is_private=is_private,
                                                  force=force)
-    sub_status = syn.store(sub_status)
+    syn.store(sub_status)
     return mock_response
