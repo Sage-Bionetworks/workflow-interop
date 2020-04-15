@@ -132,7 +132,6 @@ def test_annotate_submission(mock_syn):
     sub_status = Mock(synapseclient.SubmissionStatus)
     sub_status.status = "RECEIVED"
 
-
     updated_status = Mock(synapseclient.SubmissionStatus)
     updated_status.status = "SCORED"
 
@@ -148,6 +147,8 @@ def test_annotate_submission(mock_syn):
                                             is_private=False, force=True)
         assert response.status_code == 200
         patch_get.assert_called_once_with('subid_1')
+        # Set this to be SCORED to test if setting status in
+        # annotate_submission works
         sub_status.status = "SCORED"
         patch_update.assert_called_once_with(sub_status, {'test': 'foo'},
                                              is_private=False,
