@@ -4,6 +4,7 @@ Synapse Queue
 """
 import logging
 
+from synapseclient import Synapse
 from synapseclient.retry import _with_retry
 
 from .util import annotate_submission
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 # TODO: Create OrchestratorQueue and possibly extend submissions
 
 
-def create_submission(syn: 'Synapse', queue_id: str, entity_id: str) -> str:
+def create_submission(syn: Synapse, queue_id: str, entity_id: str) -> str:
     """
     Submit a new job request to an evaluation queue.
 
@@ -34,7 +35,7 @@ def create_submission(syn: 'Synapse', queue_id: str, entity_id: str) -> str:
     return submission.id
 
 
-def get_submissions(syn: 'Synapse', queue_id: str,
+def get_submissions(syn: Synapse, queue_id: str,
                     status: str = None) -> list:
     """Return all ids with the requested status.
 
@@ -58,7 +59,7 @@ def get_submissions(syn: 'Synapse', queue_id: str,
         return []
 
 
-def get_submission_bundle(syn: 'Synapse', submission_id: str) -> dict:
+def get_submission_bundle(syn: Synapse, submission_id: str) -> dict:
     """Return the submission's info.
     # TODO: Expose this as an API call?
 
@@ -80,7 +81,7 @@ def get_submission_bundle(syn: 'Synapse', submission_id: str) -> dict:
     return bundle
 
 
-def update_submission(syn: 'Synapse', submission_id: str, value: dict,
+def update_submission(syn: Synapse, submission_id: str, value: dict,
                       status: str = None):
     """
     Update the status of a submission. Accounts for concurrent status updates

@@ -14,6 +14,7 @@ import json
 import datetime as dt
 
 from IPython.display import display, clear_output
+from synapseclient import Synapse
 from synapseclient.exceptions import SynapseHTTPError
 from synapseclient.annotations import from_submission_status_annotations
 
@@ -33,7 +34,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def run_submission(syn: 'Synapse', queue_id: str, submission_id: str,
+def run_submission(syn: Synapse, queue_id: str, submission_id: str,
                    wes_id: str = None, opts: dict = None) -> dict:
     """For a single submission to a single evaluation queue, run
     the workflow in a single environment.
@@ -88,7 +89,7 @@ def run_submission(syn: 'Synapse', queue_id: str, submission_id: str,
     return run_log
 
 
-def run_queue(syn: 'Synapse', queue_id: str, wes_id: str = None,
+def run_queue(syn: Synapse, queue_id: str, wes_id: str = None,
               opts: dict = None) -> dict:
     """
     Run all submissions in a queue in a single environment.
@@ -127,7 +128,7 @@ def run_queue(syn: 'Synapse', queue_id: str, wes_id: str = None,
     return queue_log
 
 
-def monitor_queue(syn: 'Synapse', queue_id: str) -> dict:
+def monitor_queue(syn: Synapse, queue_id: str) -> dict:
     """Update the status of all submissions for a queue.
 
     Args:
