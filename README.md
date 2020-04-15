@@ -295,6 +295,6 @@ orchestrator.run_job(queue_id=9614423,
 synapse_orchestrator.run_submission(syn, queue_id=9614423,
                                    submission_id=9702899, wes_id='local')
 synapse_orchestrator.run_queue(syn, queue_id=9614423,
-                              wes_id='local')
+                               wes_id='local')
 synapse_orchestrator.monitor_queue(syn, queue_id=9614423)
 ```
