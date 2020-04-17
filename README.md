@@ -282,19 +282,34 @@ orchestrator.run_job(queue_id='test_cwl_queue',
 
 #### Synapse Orchestration
 
+Configuring a queue in `queues.yaml`.  Replace 12345 with your Synapse Evaluation id.
+
+```yaml
+12345:
+  target_queue: null
+  trs_id: null
+  version_id: null
+  wes_default: local
+  wes_opts:
+  - local
+  workflow_attachments:
+  - file://tests/input.cwl
+  workflow_id: null
+  workflow_type: CWL
+  workflow_url: /path/to/workflow.cwl
+```
+
+Running submissions from Synapse
+
 ```python
 from wfinterop import synapse_orchestrator
-from wfinterop import orchestrator
 import synapseclient
 syn = synapseclient.login()
 
-orchestrator.run_job(queue_id=9614423,
-                     wes_id='local',
-                     wf_jsonyaml='file://input.json',
-                     submission=True)
 synapse_orchestrator.run_submission(syn, queue_id=9614423,
-                                   submission_id=9702899, wes_id='local')
+                                    submission_id=9702899, wes_id='local')
 synapse_orchestrator.run_queue(syn, queue_id=9614423,
                                wes_id='local')
 synapse_orchestrator.monitor_queue(syn, queue_id=9614423)
 ```
+
