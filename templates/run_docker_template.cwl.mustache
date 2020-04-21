@@ -1,0 +1,32 @@
+#!/usr/bin/env cwl-runner
+#
+# Run a docker image
+#
+cwlVersion: v1.0
+class: CommandLineTool
+
+hints:
+  DockerRequirement:
+    dockerPull: {{{ docker_repository }}}
+
+inputs:
+  - id: input
+    type: Directory
+
+outputs:
+  - id: prediction_file
+    type: File
+    outputBinding:
+      glob: {{prediction_file}}
+{{#training}}
+  - id: model_state
+    type: Directory
+    outputBinding:
+      glob: model
+{{/training}}
+{{#scratch}}
+  - id: scratch
+    type: Directory
+    outputBinding:
+      glob: scratch
+{{/scratch}}

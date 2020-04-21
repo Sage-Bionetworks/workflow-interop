@@ -13,6 +13,7 @@ import sys
 import time
 import os
 
+import chevron
 from IPython.display import display, clear_output
 from synapseclient import Synapse
 from synapseclient.exceptions import SynapseHTTPError
@@ -32,6 +33,7 @@ from wfinterop.synapse_queue import update_submission
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
 
 # TODO: add this into run_submission
 def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
@@ -68,11 +70,22 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
 
     if sub.dockerRepositoryName is not None:
         repo_name = f"{sub.dockerRepositoryName}@{sub.dockerDigest}"
-        # TODO: Can pull run docker template from somewhere
-        with open("run_docker_template.cwl", "r") as template_f:
-            template = template_f.read()
-        template = template.format(docker_repository=repo_name)
+        # mustache template
+        # Create docker tool with right docker hint
+        cwl_input = {'docker_repository': repo_name,
+                     'prediction_file': 'predictions.csv',
+                     'training': False,
+                     'scratch': False}
+        with open('run_docker_template.cwl.mustache', 'r') as mus_f:
+            template = chevron.render(mus_f, cwl_input)
         with open(f"{sub.id}.cwl", "w") as sub_f:
+            sub_f.write(template)
+
+        # Create workflow with correct run docker step
+        workflow_input = {'run_docker_tool': f"{sub.id}.cwl"}
+        with open('workflow.cwl.mustache', 'r') as mus_f:
+            template = chevron.render(mus_f, workflow_input)
+        with open(f"{sub.id}_workflow.cwl", "w") as sub_f:
             sub_f.write(template)
         # TODO: This is a dummy value
         input_dict = {
@@ -85,12 +98,14 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         # Imagine the workfow + input scenario
         with open(f"{sub.id}.json", "w") as input_f:
             json.dump(input_dict, input_f)
+        attachments = ["file://" + os.path.abspath("validate_and_score.cwl"),
+                       "file://" + os.path.abspath(f"{sub.id}.cwl")]
         add_queue(queue_id=sub.id,
                   wf_type='CWL',
-                  wf_url=os.path.abspath(f"{sub.id}.cwl"),
+                  wf_url=os.path.abspath(f"{sub.id}_workflow.cwl"),
                   # TODO: need to fix this bug.  WF attachments shouldn't
                   # be required
-                  wf_attachments=["file://tests/testdata/md5sum.input"])
+                  wf_attachments=attachments)
     # if submission['wes_id'] is not None:
     #     wes_id = submission['wes_id']
     # TODO: Fix hard coded wes_id
