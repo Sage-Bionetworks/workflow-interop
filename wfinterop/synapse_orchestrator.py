@@ -73,9 +73,9 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         template = template.format(docker_repository=repo_name)
         with open(f"{sub.id}.cwl", "w") as sub_f:
             sub_f.write(template)
-        add_queue(queue_id=sub.objectId,
+        add_queue(queue_id=sub.id,
                   wf_type='CWL',
-                  wf_url=os.path.abspath(f"{sub.objectId}.cwl"))
+                  wf_url=os.path.abspath(f"{sub.id}.cwl"))
     # if submission['wes_id'] is not None:
     #     wes_id = submission['wes_id']
     # TODO: Fix hard coded wes_id
@@ -84,8 +84,8 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
     logger.info(" Submitting to WES endpoint '{}':"
                 " \n - submission ID: {}"
                 .format(wes_id, submission_id))
-    wf_jsonyaml = sub.filePath
-    logger.info(" Job parameters: '{}'".format(wf_jsonyaml))
+    # wf_jsonyaml = sub.filePath
+    # logger.info(" Job parameters: '{}'".format(wf_jsonyaml))
 
     run_log = run_job(queue_id=sub.objectId,
                       wes_id=wes_id,
