@@ -110,6 +110,8 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
                       opts=opts)
     # TODO: rename run['status'] later, it will collide with submission
     # status.status
+
+    # TODO: will have to add remove queue at some point when workflow is done
     status = "INVALID" if run_log['status'] == "FAILED" else None
     update_submission(syn, submission_id, run_log, status)
     return run_log
