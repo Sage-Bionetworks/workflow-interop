@@ -71,7 +71,7 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         with open("run_docker_template.cwl") as template_f:
             template = template_f.read()
         template = template.format(docker_repository=repo_name)
-        with open(f"{sub.objectId}.cwl") as sub_f:
+        with open(f"{sub.id}.cwl") as sub_f:
             sub_f.write(template)
         add_queue(queue_id=sub.objectId,
                   wf_type='CWL',
