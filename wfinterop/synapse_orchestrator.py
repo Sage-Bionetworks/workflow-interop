@@ -73,8 +73,15 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         template = template.format(docker_repository=repo_name)
         with open(f"{sub.id}.cwl", "w") as sub_f:
             sub_f.write(template)
+
+        input_dict = {
+            "input": {
+                "class": "Directory",
+                "location": "/home/tyu"
+            }
+        }
         with open(f"{sub.id}.json", "w") as input_f:
-            json.dump({"input": "/home/tyu"}, input_f)
+            json.dump(input_dict, input_f)
         add_queue(queue_id=sub.id,
                   wf_type='CWL',
                   wf_url=os.path.abspath(f"{sub.id}.cwl"),
