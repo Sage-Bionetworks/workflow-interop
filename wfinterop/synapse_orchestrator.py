@@ -87,7 +87,7 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
     # wf_jsonyaml = sub.filePath
     # logger.info(" Job parameters: '{}'".format(wf_jsonyaml))
 
-    run_log = run_job(queue_id=sub.objectId,
+    run_log = run_job(queue_id=sub.id,
                       wes_id=wes_id,
                       # This is hard coded for now
                       wf_jsonyaml={"input": "/home/tyu"},
