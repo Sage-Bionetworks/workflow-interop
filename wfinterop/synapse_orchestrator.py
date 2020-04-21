@@ -6,12 +6,12 @@ retrieval and formatting of parameters, if not provided; post
 the workflow run request to a given WES implementation;
 monitor and report results of the workflow run.
 """
+import datetime as dt
 import logging
+import json
 import sys
 import time
 import os
-import json
-import datetime as dt
 
 from IPython.display import display, clear_output
 from synapseclient import Synapse
@@ -73,6 +73,8 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         template = template.format(docker_repository=repo_name)
         with open(f"{sub.id}.cwl", "w") as sub_f:
             sub_f.write(template)
+        with open(f"{sub.id}.json", "w") as input_f:
+            json.dumps({"input": "/home/tyu"}, input_f)
         add_queue(queue_id=sub.id,
                   wf_type='CWL',
                   wf_url=os.path.abspath(f"{sub.id}.cwl"),
@@ -92,7 +94,7 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
     run_log = run_job(queue_id=sub.id,
                       wes_id=wes_id,
                       # This is hard coded for now
-                      wf_jsonyaml={"input": "/home/tyu"},
+                      wf_jsonyaml="file://" + os.path.abspath(f"{sub.id}.json"),
                       submission=True,
                       opts=opts)
     # TODO: rename run['status'] later, it will collide with submission
