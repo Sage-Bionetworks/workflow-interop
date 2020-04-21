@@ -18,7 +18,7 @@ from synapseclient import Synapse
 from synapseclient.exceptions import SynapseHTTPError
 from synapseclient.annotations import from_submission_status_annotations
 
-from wfinterop.config import queue_config, wes_config
+from wfinterop.config import add_queue, queue_config, wes_config
 from wfinterop.util import ctime2datetime, convert_timedelta
 from wfinterop.wes import WES
 # from wfinterop.trs2wes import store_verification
@@ -32,6 +32,72 @@ from wfinterop.synapse_queue import update_submission
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+
+def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
+                          wes_id: str = None, opts: dict = None) -> dict:
+    """For a single submission to a single evaluation queue, run
+    the workflow in a single environment.
+
+    Args:
+        syn: Synapse connection
+        queue_id: String identifying the workflow queue.
+        submission_id: String identifying the submission.
+        wes_id: String identifying the WES id.
+        opts: run_job parameters
+
+    Returns:
+        Run information of submission
+        {'run_id':...
+         'status':...}
+
+    """
+    submission = get_submission_bundle(syn, submission_id)
+    sub = submission['submission']
+    status = submission['submissionStatus']
+
+    try:
+        status.status = "EVALUATION_IN_PROGRESS"
+        # TODO: add in canCancel later
+        # status.canCancel = True
+        status = syn.store(status)
+    except SynapseHTTPError as err:
+        if err.response.status_code != 412:
+            raise err
+        return
+
+    if sub.dockerRepositoryName is not None:
+        repo_name = f"{sub.dockerRepositoryName}@{sub.dockerDigest}"
+        with open("run_docker_template.cwl") as template_f:
+            template = template_f.read()
+        template = template.format(docker_repository=repo_name)
+        with open(f"{sub.objectId}.cwl") as sub_f:
+            sub_f.write(template)
+        add_queue(queue_id=sub.objectId,
+                  wf_type='CWL',
+                  wf_url=os.path.abspath(f"{sub.objectId}.cwl"))
+    # if submission['wes_id'] is not None:
+    #     wes_id = submission['wes_id']
+    # TODO: Fix hard coded wes_id
+    wes_id = 'local'
+
+    logger.info(" Submitting to WES endpoint '{}':"
+                " \n - submission ID: {}"
+                .format(wes_id, submission_id))
+    wf_jsonyaml = sub.filePath
+    logger.info(" Job parameters: '{}'".format(wf_jsonyaml))
+
+    run_log = run_job(queue_id=sub.objectId,
+                      wes_id=wes_id,
+                      # This is hard coded for now
+                      wf_jsonyaml={"input": "/home/tyu"},
+                      submission=True,
+                      opts=opts)
+    # TODO: rename run['status'] later, it will collide with submission
+    # status.status
+    status = "INVALID" if run_log['status'] == "FAILED" else None
+    update_submission(syn, submission_id, run_log, status)
+    return run_log
 
 
 def run_submission(syn: Synapse, queue_id: str, submission_id: str,
