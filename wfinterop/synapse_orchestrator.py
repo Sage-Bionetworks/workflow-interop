@@ -73,11 +73,11 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         template = template.format(docker_repository=repo_name)
         with open(f"{sub.id}.cwl", "w") as sub_f:
             sub_f.write(template)
-
+        # TODO: This is a dummy value
         input_dict = {
             "input": {
                 "class": "Directory",
-                "location": "/home/tyu"
+                "location": "/home/tyu/sandbox"
             }
         }
         with open(f"{sub.id}.json", "w") as input_f:
@@ -85,7 +85,6 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         add_queue(queue_id=sub.id,
                   wf_type='CWL',
                   wf_url=os.path.abspath(f"{sub.id}.cwl"),
-                  # This is a dummy value
                   wf_attachments=["file://tests/testdata/md5sum.input"])
     # if submission['wes_id'] is not None:
     #     wes_id = submission['wes_id']
