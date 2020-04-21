@@ -33,7 +33,7 @@ from wfinterop.synapse_queue import update_submission
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-
+# TODO: add this into run_submission
 def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
                           wes_id: str = None, opts: dict = None) -> dict:
     """For a single submission to a single evaluation queue, run
@@ -68,6 +68,7 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
 
     if sub.dockerRepositoryName is not None:
         repo_name = f"{sub.dockerRepositoryName}@{sub.dockerDigest}"
+        # TODO: Can pull run docker template from somewhere
         with open("run_docker_template.cwl", "r") as template_f:
             template = template_f.read()
         template = template.format(docker_repository=repo_name)
@@ -80,11 +81,15 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
                 "location": "/home/tyu/sandbox"
             }
         }
+        # TODO: The input can also be passed in.
+        # Imagine the workfow + input scenario
         with open(f"{sub.id}.json", "w") as input_f:
             json.dump(input_dict, input_f)
         add_queue(queue_id=sub.id,
                   wf_type='CWL',
                   wf_url=os.path.abspath(f"{sub.id}.cwl"),
+                  # TODO: need to fix this bug.  WF attachments shouldn't
+                  # be required
                   wf_attachments=["file://tests/testdata/md5sum.input"])
     # if submission['wes_id'] is not None:
     #     wes_id = submission['wes_id']
@@ -99,7 +104,7 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
 
     run_log = run_job(queue_id=sub.id,
                       wes_id=wes_id,
-                      # This is hard coded for now
+                      # TODO: This is hard coded for now
                       wf_jsonyaml="file://" + os.path.abspath(f"{sub.id}.json"),
                       submission=True,
                       opts=opts)
