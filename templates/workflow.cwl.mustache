@@ -27,20 +27,20 @@ steps:
       - id: input
         source: "#input"
     out:
-      - id: predictions
+      - id: prediction_file
 
   validate_and_score:
     run: validate_and_score.cwl
     in:
       - id: inputfile
-        source: "#run_docker/predictions"
+        source: "#run_docker/prediction_file"
     out:
       - id: results
 
 outputs:
   output:
     type: File
-    outputSource: run_docker/predictions
+    outputSource: run_docker/prediction_file
 
   scores:
     type: File
