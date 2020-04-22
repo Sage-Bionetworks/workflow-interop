@@ -27,7 +27,7 @@ Additionally, the application supports the following operations:
 ```console
 git clone https://github.com/Sage-Bionetworks/workflow-interop
 pip install .
-pip install toil[all] challengeutils
+pip install toil[all] challengeutils chevron
 ```
 
 

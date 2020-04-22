@@ -7,11 +7,12 @@ the workflow run request to a given WES implementation;
 monitor and report results of the workflow run.
 """
 import datetime as dt
-import logging
 import json
+import logging
+import os
+import shutil
 import sys
 import time
-import os
 
 import chevron
 from IPython.display import display, clear_output
@@ -109,7 +110,10 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         # Imagine the workfow + input scenario
         with open(f"{sub.id}.json", "w") as input_f:
             json.dump(input_dict, input_f)
-        attachments = ["file://" + VALIDATE_AND_SCORE,
+        # This is to ensure validate_and_score.cwl lives in
+        # home directory of CWL
+        shutil.copy(VALIDATE_AND_SCORE, ".")
+        attachments = ["file://" + os.path.abspath("validate_and_score.cwl"),
                        "file://" + os.path.abspath(f"{sub.id}.cwl")]
         add_queue(queue_id=sub.id,
                   wf_type='CWL',
