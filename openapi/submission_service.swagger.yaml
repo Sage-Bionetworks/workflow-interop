@@ -1,0 +1,572 @@
+openapi: 3.0.0
+info:
+  description: |
+    This is the submission API to obtain the metadata of the submission
+    and send the submission to execute in the right workflow environment
+  version: "1.0.0"
+  title: Submission API
+  termsOfService: 'challenge.org'
+  contact:
+    email: thomas.yu@sagebionetworks.org
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/thomasyu888/submission/1.0.0
+  - url: 'https://repo-prod.prod.sagebase.org/repo/v1'
+tags:
+  - name: queue
+    description: Ceate and link synapse queues with workflow engines
+  - name: workflow
+    description: Allow synapse submissions to interact with supported workflow engines
+    externalDocs:
+      description: Mimics GA4GH
+      url: https://github.com/ga4gh/workflow-execution-service-schemas
+  - name: submission
+    description: Submission and its metadata
+    externalDocs:
+      description: More about submission references
+      url: 'https://rest-docs.synapse.org/rest/#org.sagebionetworks.repo.web.controller.EvaluationController'
+paths:
+  /queue/{queueId}/logs:
+    get:
+      tags:
+      - workflow
+      summary: Monitor queue
+      description: Monitors queue
+      responses:
+        '200':
+          description: OK
+  /queue/{queueId}:
+    parameters:
+    - name: queueId
+      in: path
+      description: ID of queue
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - queue
+      summary: Get Queue
+      description: Get Queue
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Queue'
+    put:
+      tags:
+      - queue
+      summary: Updates queue
+      description: updates queue
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - queue
+      summary: Deletes queue
+      description: Deletes Queue
+      responses:
+        '200':
+          description: OK
+  /queue:
+    post:
+      tags:
+      - queue
+      summary: Create queue
+      description: Creates Synapse Queue
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Queue'
+  /submission/{submissionId}/output:
+    parameters:
+    - name: submissionId
+      in: path
+      description: ID of submission
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - workflow
+      summary: Get submission workflow output
+      description: Gets submission workflow output
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+  /submission/{submissionId}/restart:
+    parameters:
+    - name: submissionId
+      in: path
+      description: ID of submission
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - workflow
+      summary: Restart submissions
+      description: Restart submissions
+      responses:
+        '200':
+          description: OK
+  /submission/{submissionId}/status:
+    parameters:
+    - name: submissionId
+      in: path
+      description: ID of submission
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - submission
+      - workflow
+      summary: Gets submission status
+      description: Gets submission status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Status'     
+    put:
+      tags:
+      - submission
+      - workflow
+      summary: Update submission status
+      description: Update submission status
+      responses:
+        '200':
+          description: OK
+  /submission/{submissionId}:
+    parameters:
+    - name: submissionId
+      in: path
+      description: ID of submission
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - submission
+      summary: Gets submission metadata
+      operationId: getSubmission
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+            application/xml:
+               schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '400':
+          description: Invalid submission value
+    put:
+      tags:
+        - submission
+      summary: Updates a submission
+      operationId: updateSubmission
+      responses:
+        '405':
+          description: Invalid input
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+          application/xml:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+    delete:
+      tags:
+        - submission
+      summary: Deletes a submission
+      operationId: deleteSubmission
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Submission not found
+  /submission/{submissionId}/data:
+    parameters:
+    - name: submissionId
+      in: path
+      description: ID of submission
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+        - submission
+      summary: Gets submission data
+      operationId: getSubmissionData
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '400':
+          description: Invalid submission value  
+  /submission/{submissionId}/image:
+    parameters:
+    - name: submissionId
+      in: path
+      description: ID of submission
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+        - submission
+      summary: Gets submission image
+      operationId: getSubmissionImage
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '400':
+          description: Invalid submission value
+  /submission/{submissionId}/logs:
+    parameters:
+    - name: submissionId
+      in: path
+      description: ID of submission
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+        - workflow
+      summary: Gets submission log
+      operationId: getSubmissionLog
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '400':
+          description: Invalid submission value
+  /submission:
+    post:
+      tags:
+        - submission
+      summary: Submits a submission
+      operationId: submit
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+      # https://swagger.io/docs/specification/describing-request-body/file-upload/?
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+          application/xml:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+
+  /submission/{submissionId}/schedule:
+    parameters:
+      - name: submissionId
+        in: path
+        description: ID of submission
+        required: true
+        schema:
+          type: integer
+          format: int64
+    post:
+      tags:
+        - workflow
+      summary: Schedules a submission workflow
+      operationId: runSubmission
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+          application/xml:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+    get:
+      tags:
+        - workflow
+      summary: Gets submission run
+      operationId: getSubmissionRun
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '400':
+          description: Invalid submission value
+  /submission/{submissionId}/cancel:
+    parameters:
+      - name: submissionId
+        in: path
+        description: ID of submission
+        required: true
+        schema:
+          type: integer
+          format: int64
+    post:
+      tags:
+        - workflow
+      summary: Creates cancel request
+      operationId: cancelSubmission
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+          application/xml:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Submission'
+
+components:
+  schemas:
+    Queue:
+      type: object
+      properties:
+        queueId:
+          type: integer
+          format: int64
+        trs_id:
+          type: integer
+          format: int64
+        wes_default:
+          type: string
+          default: local
+        wes_opts:
+          type: array
+          items:
+            type: string
+        workflow_attachments:
+          type: array
+          items:
+            type: string
+            format: binary
+        workflow_type:
+          type: string
+          default: CWL
+          enum:
+            - CWL
+            - WDL
+            - nextflow
+            - kubeflow
+        workflow_url:
+          type: string
+          format: binary
+        default_payload:
+          type: object
+    Submission:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        submissionId:
+          type: integer
+          format: int64
+        queueId:
+          type: integer
+          format: int64
+        # status:
+        #   type: string
+        #   description: Submission Status
+        #   enum:
+        #     - RECEIVED
+        #     - INVALID
+        #     - FAILED
+        submitter:
+          type: string
+          description: Team submitting
+        createdOn:
+          type: string
+          format: date-time
+          description: Time submission created
+        methodDescription:
+          type: string
+          description: Description of methodDescription
+        submissionType:
+          type: string
+          description: Types of submissions
+          enum:
+            - file
+            - docker
+            - workflow
+        input:
+          type: object
+          properties:
+            workflowType:
+              type: string
+              enum:
+                - kubeflow
+                - nextflow
+                - cwl
+                - wdl
+              description: Workflow type
+            workflow:
+              type: string
+              format: binary
+              description: Workflow URL or path
+            payload:
+              type: object
+              description: Inputs to the workflow
+            file:
+              type: string
+              format: binary
+              description: File submission
+            docker:
+              type: string
+              description: Docker + shadigest submmission
+    Status:
+      type: string
+      enum:
+        - RECEIVED
+        - QUEUED
+        - INITIALIZING
+        - RUNNING
+        - PAUSED
+        - COMPLETE
+        - EXECUTOR_ERROR
+        - SYSTEM_ERROR
+        - CANCELED
+        - CANCELING
+      default: RECEIVED
+      description: >-
+        * `RECEIVED`: Every submission starts in a RECEIVED state
+
+        * `QUEUED`: The task is queued.
+
+        * `INITIALIZING`: The task has been assigned to a worker and is currently preparing to run.
+        For example, the worker may be turning on, downloading input files, etc.
+
+        * `RUNNING`: The task is running. Input files are downloaded and the first Executor
+        has been started.
+
+        * `PAUSED`: The task is paused.
+        An implementation may have the ability to pause a task, but this is not required.
+
+        * `COMPLETE`: The task has completed running. Executors have exited without error and output files have been successfully uploaded.
+
+        * `EXECUTOR_ERROR`: The task encountered an error in one of the Executor processes. Generally,
+        this means that an Executor exited with a non-zero exit code.
+
+        * `SYSTEM_ERROR`: The task was stopped due to a system error, but not from an Executor,
+        for example an upload failed due to network issues, the worker's ran out
+        of disk space, etc.
+
+        * `CANCELED`: The task was canceled by the user.
+
+        * `CANCELING`: The task was canceled by the user, and is in the process of stopping.    
+          
