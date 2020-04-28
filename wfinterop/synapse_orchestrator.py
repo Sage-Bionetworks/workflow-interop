@@ -319,6 +319,10 @@ def monitor_queue(syn: Synapse, queue_id: str) -> dict:
                                   status="EVALUATION_IN_PROGRESS"):
         submission = get_submission_bundle(syn=syn, submission_id=sub_id)
         sub_status = submission['submissionStatus']
+        sub = submission['submission']
+
+        if sub.dockerRepositoryName is not None:
+            queue_id = sub.id
 
         run_log = from_submission_status_annotations(sub_status.annotations)
         # if sub_status.status == 'RECEIVED':

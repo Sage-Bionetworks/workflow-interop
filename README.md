@@ -317,8 +317,12 @@ synapse_orchestrator.run_queue(syn, queue_id=9614486,
 synapse_orchestrator.monitor_queue(syn, queue_id=9614486)
 
 # Docker submissions
-synapse_orchestrator.run_docker_submission(syn, queue_id=9614487,
-                                           submission_id=9703500, wes_id='local')
+synapse_orchestrator.run_submission(syn, queue_id=9614487,
+                                    submission_id=9703500,
+                                    wes_id='local')
+
+# synapse_orchestrator.run_docker_submission(syn, queue_id=9614487,
+#                                            submission_id=9703500, wes_id='local')
 synapse_orchestrator.run_queue(syn, queue_id=9614487,
                                wes_id='local')
 ```
