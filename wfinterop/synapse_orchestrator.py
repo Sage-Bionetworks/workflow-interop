@@ -147,6 +147,51 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
     return run_log
 
 
+def _run_docker_submission(sub):
+    repo_name = f"{sub.dockerRepositoryName}@{sub.dockerDigest}"
+    # mustache template
+    # Create docker tool with right docker hint
+    cwl_input = {'docker_repository': repo_name,
+                 'prediction_file': 'predictions.csv',
+                 'training': False,
+                 'scratch': False}
+    with open(RUN_DOCKER_TEMPLATE, 'r') as mus_f:
+        template = chevron.render(mus_f, cwl_input)
+    with open(f"{sub.id}.cwl", "w") as sub_f:
+        sub_f.write(template)
+
+    # Create workflow with correct run docker step
+    workflow_input = {'run_docker_tool': f"{sub.id}.cwl"}
+    with open(WORKFLOW_TEMPLATE, 'r') as mus_f:
+        template = chevron.render(mus_f, workflow_input)
+    with open(f"{sub.id}_workflow.cwl", "w") as sub_f:
+        sub_f.write(template)
+    # TODO: This is a dummy value
+    input_dict = {
+        "input": {
+            "class": "Directory",
+            "location": "/home/tyu/sandbox"
+        }
+    }
+    # TODO: The input can also be passed in.
+    # Imagine the workfow + input scenario
+    with open(f"{sub.id}.json", "w") as input_f:
+        json.dump(input_dict, input_f)
+    # This is to ensure validate_and_score.cwl lives in
+    # home directory of CWL
+    shutil.copy(VALIDATE_AND_SCORE, ".")
+    attachments = ["file://" + os.path.abspath("validate_and_score.cwl"),
+                    "file://" + os.path.abspath(f"{sub.id}.cwl")]
+    add_queue(queue_id=sub.id,
+              wf_type='CWL',
+              wf_url=os.path.abspath(f"{sub.id}_workflow.cwl"),
+              # TODO: need to fix this bug.  WF attachments shouldn't
+              # be required
+              wf_attachments=attachments)
+    return {'queue_id': sub.id,
+            'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
+
+
 def run_submission(syn: Synapse, queue_id: str, submission_id: str,
                    wes_id: str = None, opts: dict = None) -> dict:
     """For a single submission to a single evaluation queue, run
@@ -187,7 +232,14 @@ def run_submission(syn: Synapse, queue_id: str, submission_id: str,
     logger.info(" Submitting to WES endpoint '{}':"
                 " \n - submission ID: {}"
                 .format(wes_id, submission_id))
-    wf_jsonyaml = sub.filePath
+    # If docker repository, use _run_docker_submission
+    if sub.dockerRepositoryName is None:
+        wf_jsonyaml = sub.filePath
+    else:
+        docker_inputs = _run_docker_submission(sub)
+        wf_jsonyaml = docker_inputs['wf_jsonyaml']
+        queue_id = docker_inputs['queue_id']
+
     logger.info(" Job parameters: '{}'".format(wf_jsonyaml))
 
     run_log = run_job(queue_id=queue_id,
