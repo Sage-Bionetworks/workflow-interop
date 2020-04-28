@@ -47,109 +47,21 @@ VALIDATE_AND_SCORE = os.path.join(
 )
 
 
-# TODO: add this into run_submission
-def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
-                          wes_id: str = None, opts: dict = None) -> dict:
-    """For a single submission to a single evaluation queue, run
-    the workflow in a single environment.
+def _get_docker_runjob_inputs(sub):
+    """Get run_job inputs for a docker submission.
+    Create cwl tool with correct docker hint (via mustache) - subid.cwl.
+    Create workflow that uses custom tool - subid_workflow.cwl.
+    Create custom queue with submission id, configure it to run
+    subid_workflow.cwl.
 
     Args:
-        syn: Synapse connection
-        queue_id: String identifying the workflow queue.
-        submission_id: String identifying the submission.
-        wes_id: String identifying the WES id.
-        opts: run_job parameters
+        sub: Submission
 
     Returns:
-        Run information of submission
-        {'run_id':...
-         'status':...}
+        dict: queue_id: Queue id
+              wf_jsonyaml: workflow inputs
 
-    >>> run_docker_submission(syn, queue_id=9614487,
-                              submission_id=9703500, wes_id='local')
     """
-    submission = get_submission_bundle(syn, submission_id)
-    sub = submission['submission']
-    status = submission['submissionStatus']
-
-    try:
-        status.status = "EVALUATION_IN_PROGRESS"
-        # TODO: add in canCancel later
-        # status.canCancel = True
-        status = syn.store(status)
-    except SynapseHTTPError as err:
-        if err.response.status_code != 412:
-            raise err
-        return
-
-    if sub.dockerRepositoryName is not None:
-        repo_name = f"{sub.dockerRepositoryName}@{sub.dockerDigest}"
-        # mustache template
-        # Create docker tool with right docker hint
-        cwl_input = {'docker_repository': repo_name,
-                     'prediction_file': 'predictions.csv',
-                     'training': False,
-                     'scratch': False}
-        with open(RUN_DOCKER_TEMPLATE, 'r') as mus_f:
-            template = chevron.render(mus_f, cwl_input)
-        with open(f"{sub.id}.cwl", "w") as sub_f:
-            sub_f.write(template)
-
-        # Create workflow with correct run docker step
-        workflow_input = {'run_docker_tool': f"{sub.id}.cwl"}
-        with open(WORKFLOW_TEMPLATE, 'r') as mus_f:
-            template = chevron.render(mus_f, workflow_input)
-        with open(f"{sub.id}_workflow.cwl", "w") as sub_f:
-            sub_f.write(template)
-        # TODO: This is a dummy value
-        input_dict = {
-            "input": {
-                "class": "Directory",
-                "location": "/home/tyu/sandbox"
-            }
-        }
-        # TODO: The input can also be passed in.
-        # Imagine the workfow + input scenario
-        with open(f"{sub.id}.json", "w") as input_f:
-            json.dump(input_dict, input_f)
-        # This is to ensure validate_and_score.cwl lives in
-        # home directory of CWL
-        shutil.copy(VALIDATE_AND_SCORE, ".")
-        attachments = ["file://" + os.path.abspath("validate_and_score.cwl"),
-                       "file://" + os.path.abspath(f"{sub.id}.cwl")]
-        add_queue(queue_id=sub.id,
-                  wf_type='CWL',
-                  wf_url=os.path.abspath(f"{sub.id}_workflow.cwl"),
-                  # TODO: need to fix this bug.  WF attachments shouldn't
-                  # be required
-                  wf_attachments=attachments)
-    # if submission['wes_id'] is not None:
-    #     wes_id = submission['wes_id']
-    # TODO: Fix hard coded wes_id
-    wes_id = 'local'
-
-    logger.info(" Submitting to WES endpoint '{}':"
-                " \n - submission ID: {}"
-                .format(wes_id, submission_id))
-    # wf_jsonyaml = sub.filePath
-    # logger.info(" Job parameters: '{}'".format(wf_jsonyaml))
-
-    run_log = run_job(queue_id=sub.id,
-                      wes_id=wes_id,
-                      # TODO: This is hard coded for now
-                      wf_jsonyaml="file://" + os.path.abspath(f"{sub.id}.json"),
-                      submission=True,
-                      opts=opts)
-    # TODO: rename run['status'] later, it will collide with submission
-    # status.status
-
-    # TODO: will have to add remove queue at some point when workflow is done
-    status = "INVALID" if run_log['status'] == "FAILED" else None
-    update_submission(syn, submission_id, run_log, status)
-    return run_log
-
-
-def _get_docker_runjob_inputs(sub):
     repo_name = f"{sub.dockerRepositoryName}@{sub.dockerDigest}"
     # mustache template
     # Create docker tool with right docker hint
@@ -183,7 +95,7 @@ def _get_docker_runjob_inputs(sub):
     # home directory of CWL
     shutil.copy(VALIDATE_AND_SCORE, ".")
     attachments = ["file://" + os.path.abspath("validate_and_score.cwl"),
-                    "file://" + os.path.abspath(f"{sub.id}.cwl")]
+                   "file://" + os.path.abspath(f"{sub.id}.cwl")]
     add_queue(queue_id=sub.id,
               wf_type='CWL',
               wf_url=os.path.abspath(f"{sub.id}_workflow.cwl"),
@@ -195,7 +107,18 @@ def _get_docker_runjob_inputs(sub):
 
 
 def _get_workflow_runjob_inputs(sub):
-    """Get run_job inputs for a workflow submission"""
+    """Get run_job inputs for a workflow submission.
+    Create custom queue with submission id and configure it to run
+    custom workflow
+
+    Args:
+        sub: Submission
+
+    Returns:
+        dict: queue_id: Queue id
+              wf_jsonyaml: workflow inputs
+
+    """
     # TODO: This is a dummy value
     input_dict = {
         "message": "hello world"
@@ -217,7 +140,17 @@ def _get_workflow_runjob_inputs(sub):
 
 
 def get_runjob_inputs(sub, queue_id):
-    """Gets run_job inputs based on submission type"""
+    """Gets run_job inputs based on submission type
+
+    Args:
+        sub: Submission
+        queue_id: Queue id
+
+    Returns:
+        dict: queue_id: Queue id
+              wf_jsonyaml: workflow inputs
+
+    """
     # If docker repository, use _run_docker_submission
     if sub.get("dockerRepositoryName") is None:
         # If the file is a workflow / tool
