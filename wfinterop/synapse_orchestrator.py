@@ -194,11 +194,39 @@ def _get_docker_runjob_inputs(sub):
             'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
 
 
+def _get_workflow_runjob_inputs(sub):
+    """Get run_job inputs for a workflow submission"""
+    # TODO: This is a dummy value
+    input_dict = {
+        "message": "hello world"
+    }
+    # TODO: The input can also be passed in.
+    # Imagine the workfow + input scenario
+    with open(f"{sub.id}.json", "w") as input_f:
+        json.dump(input_dict, input_f)
+    # This is a dummy value because add queue fails without attachments
+    attachments = ["file://" + "dummpy.cwl"]
+    add_queue(queue_id=sub.id,
+              wf_type='CWL',
+              wf_url=sub.filePath,
+              # TODO: need to fix this bug.  WF attachments shouldn't
+              # be required
+              wf_attachments=attachments)
+    return {'queue_id': sub.id,
+            'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
+
+
 def get_runjob_inputs(sub, queue_id):
     """Gets run_job inputs based on submission type"""
     # If docker repository, use _run_docker_submission
     if sub.dockerRepositoryName is None:
-        wf_jsonyaml = sub.filePath
+        # If the file is a workflow / tool
+        if sub.filePath.endswith(".cwl"):
+            workflow_inputs = _get_workflow_runjob_inputs(sub)
+            wf_jsonyaml = workflow_inputs['wf_jsonyaml']
+            queue_id = workflow_inputs['queue_id']
+        else:
+            wf_jsonyaml = sub.filePath
     else:
         docker_inputs = _get_docker_runjob_inputs(sub)
         wf_jsonyaml = docker_inputs['wf_jsonyaml']
@@ -335,8 +363,9 @@ def monitor_queue(syn: Synapse, queue_id: str) -> dict:
         sub_status = submission['submissionStatus']
         sub = submission['submission']
 
-        if sub.dockerRepositoryName is not None:
+        if sub.dockerRepositoryName is not None or sub.filePath.endswith('.cwl'):
             queue_id = sub.id
+
 
         run_log = from_submission_status_annotations(sub_status.annotations)
         # if sub_status.status == 'RECEIVED':
