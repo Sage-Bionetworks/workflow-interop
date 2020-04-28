@@ -219,7 +219,7 @@ def _get_workflow_runjob_inputs(sub):
 def get_runjob_inputs(sub, queue_id):
     """Gets run_job inputs based on submission type"""
     # If docker repository, use _run_docker_submission
-    if sub.dockerRepositoryName is None:
+    if sub.get("dockerRepositoryName") is None:
         # If the file is a workflow / tool
         if sub.filePath.endswith(".cwl"):
             workflow_inputs = _get_workflow_runjob_inputs(sub)
