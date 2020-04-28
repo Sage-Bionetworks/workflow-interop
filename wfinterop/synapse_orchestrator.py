@@ -149,7 +149,7 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
     return run_log
 
 
-def _run_docker_submission(sub):
+def _get_docker_runjob_inputs(sub):
     repo_name = f"{sub.dockerRepositoryName}@{sub.dockerDigest}"
     # mustache template
     # Create docker tool with right docker hint
@@ -194,13 +194,13 @@ def _run_docker_submission(sub):
             'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
 
 
-def get_run_job_inputs(sub, queue_id):
+def get_runjob_inputs(sub, queue_id):
     """Gets run_job inputs based on submission type"""
     # If docker repository, use _run_docker_submission
     if sub.dockerRepositoryName is None:
         wf_jsonyaml = sub.filePath
     else:
-        docker_inputs = _run_docker_submission(sub)
+        docker_inputs = _get_docker_runjob_inputs(sub)
         wf_jsonyaml = docker_inputs['wf_jsonyaml']
         queue_id = docker_inputs['queue_id']
     return {'queue_id': queue_id,
@@ -250,7 +250,7 @@ def run_submission(syn: Synapse, queue_id: str, submission_id: str,
 
     # There are 4 basic types of submissions
     # Each will have different run jobs inputs
-    run_job_inputs = get_run_job_inputs(sub, queue_id)
+    run_job_inputs = get_runjob_inputs(sub, queue_id)
     wf_jsonyaml = run_job_inputs['wf_jsonyaml']
     queue_id = run_job_inputs['queue_id']
 
