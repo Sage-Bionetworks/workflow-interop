@@ -65,6 +65,8 @@ def run_docker_submission(syn: Synapse, queue_id: str, submission_id: str,
         {'run_id':...
          'status':...}
 
+    >>> run_docker_submission(syn, queue_id=9614487,
+                              submission_id=9703500, wes_id='local')
     """
     submission = get_submission_bundle(syn, submission_id)
     sub = submission['submission']
@@ -192,6 +194,19 @@ def _run_docker_submission(sub):
             'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
 
 
+def get_run_job_inputs(sub, queue_id):
+    """Gets run_job inputs based on submission type"""
+    # If docker repository, use _run_docker_submission
+    if sub.dockerRepositoryName is None:
+        wf_jsonyaml = sub.filePath
+    else:
+        docker_inputs = _run_docker_submission(sub)
+        wf_jsonyaml = docker_inputs['wf_jsonyaml']
+        queue_id = docker_inputs['queue_id']
+    return {'queue_id': queue_id,
+            'wf_jsonyaml': wf_jsonyaml}
+
+
 def run_submission(syn: Synapse, queue_id: str, submission_id: str,
                    wes_id: str = None, opts: dict = None) -> dict:
     """For a single submission to a single evaluation queue, run
@@ -232,13 +247,12 @@ def run_submission(syn: Synapse, queue_id: str, submission_id: str,
     logger.info(" Submitting to WES endpoint '{}':"
                 " \n - submission ID: {}"
                 .format(wes_id, submission_id))
-    # If docker repository, use _run_docker_submission
-    if sub.dockerRepositoryName is None:
-        wf_jsonyaml = sub.filePath
-    else:
-        docker_inputs = _run_docker_submission(sub)
-        wf_jsonyaml = docker_inputs['wf_jsonyaml']
-        queue_id = docker_inputs['queue_id']
+
+    # There are 4 basic types of submissions
+    # Each will have different run jobs inputs
+    run_job_inputs = get_run_job_inputs(sub, queue_id)
+    wf_jsonyaml = run_job_inputs['wf_jsonyaml']
+    queue_id = run_job_inputs['queue_id']
 
     logger.info(" Job parameters: '{}'".format(wf_jsonyaml))
 
