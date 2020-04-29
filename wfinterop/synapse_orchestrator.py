@@ -16,7 +16,7 @@ import time
 
 import chevron
 from IPython.display import display, clear_output
-from synapseclient import Synapse
+from synapseclient import Synapse, Submission, SubmissionStatus
 from synapseclient.exceptions import SynapseHTTPError
 from synapseclient.annotations import from_submission_status_annotations
 
@@ -47,7 +47,7 @@ VALIDATE_AND_SCORE = os.path.join(
 )
 
 
-def _get_docker_runjob_inputs(sub):
+def _get_docker_runjob_inputs(sub: Submission) -> dict:
     """Get run_job inputs for a docker submission.
     Create cwl tool with correct docker hint (via mustache) - subid.cwl.
     Create workflow that uses custom tool - subid_workflow.cwl.
@@ -106,7 +106,7 @@ def _get_docker_runjob_inputs(sub):
             'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
 
 
-def _get_workflow_runjob_inputs(sub):
+def _get_workflow_runjob_inputs(sub: Submission) -> dict:
     """Get run_job inputs for a workflow submission.
     Create custom queue with submission id and configure it to run
     custom workflow
@@ -139,7 +139,7 @@ def _get_workflow_runjob_inputs(sub):
             'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
 
 
-def get_runjob_inputs(sub, queue_id):
+def get_runjob_inputs(sub: str, queue_id: str) -> dict:
     """Gets run_job inputs based on submission type
 
     Args:
@@ -168,6 +168,34 @@ def get_runjob_inputs(sub, queue_id):
             'wf_jsonyaml': wf_jsonyaml}
 
 
+def _set_in_progress(syn: Synapse, status: SubmissionStatus) -> SubmissionStatus:
+    """Sets submission to be in progress so that submissions can't
+    be scheduled on other instances
+
+    Args:
+        syn: Synapse connection
+        status: synapseclient.SubmissionStatus object
+
+    Returns:
+        status: stored synapseclient.SubmissionStatus
+
+    Raises:
+        SynapseHTTPError: Any SynapseHTTPError code other than 412 will be
+                          raised.
+
+    """
+    try:
+        status.status = "EVALUATION_IN_PROGRESS"
+        # TODO: add in canCancel later
+        # status.canCancel = True
+        status = syn.store(status)
+    except SynapseHTTPError as err:
+        if err.response.status_code != 412:
+            raise err
+        return
+    return status
+
+
 def run_submission(syn: Synapse, queue_id: str, submission_id: str,
                    wes_id: str = None, opts: dict = None) -> dict:
     """For a single submission to a single evaluation queue, run
@@ -190,16 +218,10 @@ def run_submission(syn: Synapse, queue_id: str, submission_id: str,
     sub = submission['submission']
     status = submission['submissionStatus']
 
-    try:
-        status.status = "EVALUATION_IN_PROGRESS"
-        # TODO: add in canCancel later
-        # status.canCancel = True
-        status = syn.store(status)
-    except SynapseHTTPError as err:
-        if err.response.status_code != 412:
-            raise err
+    status = _set_in_progress(syn, status)
+    # Don't run submission if status is None
+    if status is None:
         return
-
     # if submission['wes_id'] is not None:
     #     wes_id = submission['wes_id']
     # TODO: Fix hard coded wes_id

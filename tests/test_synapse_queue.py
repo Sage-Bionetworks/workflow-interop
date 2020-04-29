@@ -9,10 +9,9 @@ import synapseclient
 from synapseclient.retry import _with_retry
 
 from wfinterop import util
-from wfinterop.synapse_queue import create_submission
-from wfinterop.synapse_queue import get_submissions
-from wfinterop.synapse_queue import get_submission_bundle
-from wfinterop.synapse_queue import update_submission
+from wfinterop.synapse_queue import (create_submission,
+                                     get_submissions,
+                                     get_submission_bundle, update_submission)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ def test_create_submission(mock_syn):
     sub = Mock(synapseclient.Submission)
     sub.id = "test"
     with patch.object(mock_syn, "submit", return_value=sub) as patch_submit:
-        test_sub_id = create_submission(mock_syn,
+        test_sub_id = _set_in_progress(mock_syn,
                                         queue_id='mock_queue_1',
                                         entity_id='syn12345')
         assert test_sub_id == sub.id

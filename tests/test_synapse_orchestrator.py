@@ -1,18 +1,53 @@
 """Test synapse orchestrator"""
 import mock
-from mock import Mock
+from mock import Mock, patch
 import pytest
 import datetime as dt
 
 from bravado.requests_client import RequestsClient
 from bravado.client import SwaggerClient, ResourceDecorator
 from bravado.testing.response_mocks import BravadoResponseMock
+import synapseclient
+try:
+    from synapseclient.exceptions import SynapseHTTPError
+except ModuleNotFoundError:
+    from synapseclient.core.exceptions import SynapseHTTPError
 
 from wfinterop.wes.wrapper import WES
-from wfinterop.synapse_orchestrator import run_submission
-from wfinterop.synapse_orchestrator import run_queue
-from wfinterop.synapse_orchestrator import monitor_queue
-from wfinterop.synapse_orchestrator import monitor
+from wfinterop.synapse_orchestrator import (run_submission, run_queue,
+                                            monitor_queue, monitor,
+                                            _set_in_progress)
+
+
+def test__set_in_progress(mock_syn):
+    status = Mock(synapseclient.SubmissionStatus)
+    status.id = "test"
+    with patch.object(mock_syn, "store", return_value=status) as patch_store:
+        new_status = _set_in_progress(mock_syn, status=status)
+        assert new_status == status
+        status.status = "EVALUATION_IN_PROGRESS"
+        patch_store.assert_called_once_with(status)
+
+
+def test__set_in_progress_412error(mock_syn):
+    status = Mock(synapseclient.SubmissionStatus)
+    status.id = "test"
+    mocked_412 = SynapseHTTPError("foo", response=Mock(status_code=412))
+    with patch.object(mock_syn, "store",
+                      side_effect=mocked_412):
+        new_status = _set_in_progress(mock_syn, status=status)
+        assert new_status is None
+
+
+def test__set_in_progress_raises(mock_syn):
+    status = Mock(synapseclient.SubmissionStatus)
+    status.id = "test"
+    mocked_409 = SynapseHTTPError("foo", response=Mock(status_code=409))
+    with patch.object(mock_syn, "store",
+                      side_effect=mocked_409),\
+         pytest.raises(SynapseHTTPError):
+        new_status = _set_in_progress(mock_syn, status=status)
+        assert new_status is None
 
 
 def test_run_submission(mock_run_log,
@@ -22,6 +57,8 @@ def test_run_submission(mock_run_log,
            'submissionStatus': Mock()}
     monkeypatch.setattr('wfinterop.synapse_orchestrator.get_submission_bundle',
                         lambda x,y: sub)
+    monkeypatch.setattr('wfinterop.synapse_orchestrator._set_in_progress',
+                        lambda x,y: None)
     monkeypatch.setattr('wfinterop.synapse_orchestrator.update_submission',
                         lambda w,x,y,z: None)
     monkeypatch.setattr('wfinterop.synapse_orchestrator.run_job',
