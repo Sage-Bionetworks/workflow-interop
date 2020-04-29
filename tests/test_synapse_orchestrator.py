@@ -55,14 +55,18 @@ def test_run_submission(mock_run_log,
                         monkeypatch):
     sub = {'submission': Mock(filePath="foo"),
            'submissionStatus': Mock()}
+    runjob_inputs = {"wf_jsonyaml": "foo",
+                     "queue_id": 'foo'}
     monkeypatch.setattr('wfinterop.synapse_orchestrator.get_submission_bundle',
                         lambda x,y: sub)
     monkeypatch.setattr('wfinterop.synapse_orchestrator._set_in_progress',
-                        lambda x,y: None)
-    monkeypatch.setattr('wfinterop.synapse_orchestrator.update_submission',
-                        lambda w,x,y,z: None)
+                        lambda x,y: sub['submissionStatus'])
+    monkeypatch.setattr('wfinterop.synapse_orchestrator.get_runjob_inputs',
+                        lambda x,y: runjob_inputs)
     monkeypatch.setattr('wfinterop.synapse_orchestrator.run_job',
                         lambda **kwargs: mock_run_log)
+    monkeypatch.setattr('wfinterop.synapse_orchestrator.update_submission',
+                        lambda w,x,y,z: None)
 
     test_run_log = run_submission(syn=mock_syn,
                                   queue_id='mock_queue',

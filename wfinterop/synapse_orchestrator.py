@@ -221,7 +221,7 @@ def run_submission(syn: Synapse, queue_id: str, submission_id: str,
     status = _set_in_progress(syn, status)
     # Don't run submission if status is None
     if status is None:
-        return
+        return None
     # if submission['wes_id'] is not None:
     #     wes_id = submission['wes_id']
     # TODO: Fix hard coded wes_id
@@ -317,7 +317,7 @@ def monitor_queue(syn: Synapse, queue_id: str) -> dict:
         submission = get_submission_bundle(syn=syn, submission_id=sub_id)
         sub_status = submission['submissionStatus']
         sub = submission['submission']
-
+        # TODO: add test for this
         if  (sub.get('dockerRepositoryName') is not None or
              sub.filePath.endswith('.cwl')):
             queue_id = sub.id
