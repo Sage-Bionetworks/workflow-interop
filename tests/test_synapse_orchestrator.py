@@ -8,6 +8,7 @@ from bravado.requests_client import RequestsClient
 from bravado.client import SwaggerClient, ResourceDecorator
 from bravado.testing.response_mocks import BravadoResponseMock
 import synapseclient
+from synapseclient import SubmissionStatus
 try:
     from synapseclient.exceptions import SynapseHTTPError
 except ModuleNotFoundError:
@@ -16,7 +17,8 @@ except ModuleNotFoundError:
 from wfinterop.wes.wrapper import WES
 from wfinterop.synapse_orchestrator import (run_submission, run_queue,
                                             monitor_queue, monitor,
-                                            _set_in_progress)
+                                            _set_in_progress,
+                                            determine_submission_type)
 
 
 def test__set_in_progress(mock_syn):
@@ -50,9 +52,23 @@ def test__set_in_progress_raises(mock_syn):
         assert new_status is None
 
 
-# def test_get_runjob_inputs():
+@pytest.mark.parametrize(
+    "sub,expected",
+    [(SubmissionStatus(dockerRepositoryName="foo"), "docker"),
+     (SubmissionStatus(filePath="foo.cwl"), "cwl"),
+     (SubmissionStatus(filePath="foo.json"), "payload"),
+     (SubmissionStatus(filePath="foo.yaml"), "payload"),
+     (SubmissionStatus(filePath="foo"), "flatfile")]
+)
+def test_determine_submission_type(sub, expected):
+    sub_type = determine_submission_type(sub)
+    assert sub_type == expected
 
-#     sub: str, queue_id: str
+
+def test_determine_submission_type_error():
+    sub = SubmissionStatus(filePath=None)
+    with pytest.raises(ValueError, match="Submission type not supported"):
+        determine_submission_type(sub)
 
 
 def test_run_submission(mock_run_log,

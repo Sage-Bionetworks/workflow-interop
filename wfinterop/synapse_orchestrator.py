@@ -190,16 +190,16 @@ def get_runjob_inputs(sub: str, queue_id: str) -> dict:
     return workflow_inputs
 
 
-def determine_submission_type(sub: str) -> str:
+def determine_submission_type(sub: Submission) -> str:
     """Determines submission type"""
     if sub.get("dockerRepositoryName") is not None:
         # Docker repository + shadigest
         submission_type = "docker"
     # TODO: add support for more workflow languages
-    elif sub.filePath.endswith(".cwl"):
+    elif str(sub.filePath).endswith(".cwl"):
         # CWL file
         submission_type = "cwl"
-    elif sub.filePath.endswith((".json", ".yaml")):
+    elif str(sub.filePath).endswith((".json", ".yaml")):
         # input to workflow
         submission_type = "payload"
     elif sub.filePath is not None:
