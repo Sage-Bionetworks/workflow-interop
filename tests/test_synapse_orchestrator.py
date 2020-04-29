@@ -15,10 +15,12 @@ except ModuleNotFoundError:
     from synapseclient.core.exceptions import SynapseHTTPError
 
 from wfinterop.wes.wrapper import WES
+from wfinterop import synapse_orchestrator
 from wfinterop.synapse_orchestrator import (run_submission, run_queue,
                                             monitor_queue, monitor,
                                             _set_in_progress,
-                                            determine_submission_type)
+                                            determine_submission_type,
+                                            get_runjob_inputs)
 
 
 def test__set_in_progress(mock_syn):
@@ -69,6 +71,37 @@ def test_determine_submission_type_error():
     sub = SubmissionStatus(filePath=None)
     with pytest.raises(ValueError, match="Submission type not supported"):
         determine_submission_type(sub)
+
+
+@pytest.mark.parametrize(
+    "function,sub_type",
+    [("_get_docker_runjob_inputs", "docker"),
+     ("_get_workflow_runjob_inputs", "cwl"),
+     ("_get_flatfile_runjob_inputs", "flatfile")]
+)
+def test_get_runjob_inputs(function, sub_type):
+    sub = Mock()
+    runjob_inputs = {"queue_id": 'foo',
+                     "wf_jsonyaml": "foo"}
+    with patch.object(synapse_orchestrator,
+                      "determine_submission_type",
+                      return_value=sub_type),\
+         patch.object(synapse_orchestrator,
+                      function,
+                      return_value=runjob_inputs):
+        inputs = get_runjob_inputs(sub, "foo")
+        assert inputs == runjob_inputs
+
+
+def test_get_runjob_inputs_payload():
+    sub = Mock(filePath="test")
+    runjob_inputs = {"queue_id": 'foo',
+                     "wf_jsonyaml": "test"}
+    with patch.object(synapse_orchestrator,
+                      "determine_submission_type",
+                      return_value="payload"):
+        inputs = get_runjob_inputs(sub, "foo")
+        assert inputs == runjob_inputs
 
 
 def test_run_submission(mock_run_log,
