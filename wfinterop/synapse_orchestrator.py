@@ -318,8 +318,8 @@ def monitor_queue(syn: Synapse, queue_id: str) -> dict:
         sub_status = submission['submissionStatus']
         sub = submission['submission']
         # TODO: add test for this
-        if  (sub.get('dockerRepositoryName') is not None or
-             sub.filePath.endswith('.cwl')):
+        if (sub.get('dockerRepositoryName') is not None or
+                sub.filePath.endswith('.cwl')):
             queue_id = sub.id
 
         run_log = from_submission_status_annotations(sub_status.annotations)
