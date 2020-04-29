@@ -335,5 +335,15 @@ synapse_orchestrator.run_queue(syn, queue_id=9614488,
 synapse_orchestrator.monitor_queue(syn, queue_id=9614488)
 
 
+# Prediction file
+synapse_orchestrator.run_submission(syn, queue_id=9614488,
+                                    submission_id=9703508,
+                                    wes_id='local')
+
+synapse_orchestrator.run_queue(syn, queue_id=9614488,
+                               wes_id='local')
+synapse_orchestrator.monitor_queue(syn, queue_id=9614488)
+
+
 ```
 
