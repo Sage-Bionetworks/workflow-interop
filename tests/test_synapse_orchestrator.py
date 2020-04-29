@@ -50,6 +50,11 @@ def test__set_in_progress_raises(mock_syn):
         assert new_status is None
 
 
+# def test_get_runjob_inputs():
+
+#     sub: str, queue_id: str
+
+
 def test_run_submission(mock_run_log,
                         mock_syn,
                         monkeypatch):

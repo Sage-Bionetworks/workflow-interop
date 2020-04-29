@@ -139,6 +139,31 @@ def _get_workflow_runjob_inputs(sub: Submission) -> dict:
             'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
 
 
+def _get_flatfile_runjob_inputs(sub: Submission, queue_id: str) -> dict:
+    """Get run_job inputs for a flatfile submission.
+    Create workflow input with input flat file
+
+    Args:
+        sub: Submission
+
+    Returns:
+        dict: queue_id: Queue id
+              wf_jsonyaml: workflow inputs
+
+    """
+    input_dict = {
+        "input": {
+            "class": "File",
+            "location": sub.filePath
+        }
+    }
+    with open(f"{sub.id}.json", "w") as input_f:
+        json.dump(input_dict, input_f)
+
+    return {'queue_id': queue_id,
+            'wf_jsonyaml': os.path.abspath(f"{sub.id}.json")}
+
+
 def get_runjob_inputs(sub: str, queue_id: str) -> dict:
     """Gets run_job inputs based on submission type
 
@@ -151,21 +176,39 @@ def get_runjob_inputs(sub: str, queue_id: str) -> dict:
               wf_jsonyaml: workflow inputs
 
     """
-    # If docker repository, use _run_docker_submission
-    if sub.get("dockerRepositoryName") is None:
-        # If the file is a workflow / tool
-        if sub.filePath.endswith(".cwl"):
-            workflow_inputs = _get_workflow_runjob_inputs(sub)
-            wf_jsonyaml = workflow_inputs['wf_jsonyaml']
-            queue_id = workflow_inputs['queue_id']
-        else:
-            wf_jsonyaml = sub.filePath
+    sub_type = determine_submission_type(sub)
+    if sub_type == "cwl":
+        workflow_inputs = _get_workflow_runjob_inputs(sub)
+    elif sub_type == "payload":
+        workflow_inputs = {'wf_jsonyaml': sub.filePath,
+                           'queue_id': queue_id}
+    elif sub_type == "docker":
+        workflow_inputs = _get_docker_runjob_inputs(sub)
+    elif sub_type == "flatfile":
+        workflow_inputs = _get_flatfile_runjob_inputs(sub, queue_id)
+
+    return workflow_inputs
+
+
+def determine_submission_type(sub: str) -> str:
+    """Determines submission type"""
+    if sub.get("dockerRepositoryName") is not None:
+        # Docker repository + shadigest
+        submission_type = "docker"
+    # TODO: add support for more workflow languages
+    elif sub.filePath.endswith(".cwl"):
+        # CWL file
+        submission_type = "cwl"
+    elif sub.filePath.endswith((".json", ".yaml")):
+        # input to workflow
+        submission_type = "payload"
+    elif sub.filePath is not None:
+        # Prediction file
+        submission_type = "flatfile"
     else:
-        docker_inputs = _get_docker_runjob_inputs(sub)
-        wf_jsonyaml = docker_inputs['wf_jsonyaml']
-        queue_id = docker_inputs['queue_id']
-    return {'queue_id': queue_id,
-            'wf_jsonyaml': wf_jsonyaml}
+        # TODO: Catch error, just don't run workflow
+        raise ValueError("Submission type not supported")
+    return submission_type
 
 
 def _set_in_progress(syn: Synapse, status: SubmissionStatus) -> SubmissionStatus:
@@ -318,8 +361,8 @@ def monitor_queue(syn: Synapse, queue_id: str) -> dict:
         sub_status = submission['submissionStatus']
         sub = submission['submission']
         # TODO: add test for this
-        if (sub.get('dockerRepositoryName') is not None or
-                sub.filePath.endswith('.cwl')):
+        sub_type = determine_submission_type(sub)
+        if sub_type in ['cwl', 'docker']:
             queue_id = sub.id
 
         run_log = from_submission_status_annotations(sub_status.annotations)
