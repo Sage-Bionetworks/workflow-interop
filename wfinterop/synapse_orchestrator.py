@@ -152,7 +152,7 @@ def _get_flatfile_runjob_inputs(sub: Submission, queue_id: str) -> dict:
 
     """
     input_dict = {
-        "input": {
+        "inputfile": {
             "class": "File",
             "location": sub.filePath
         }
