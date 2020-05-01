@@ -144,7 +144,6 @@ paths:
         format: int64
     get:
       tags:
-      - submission
       - workflow
       summary: Gets submission status
       description: Gets submission status
@@ -160,7 +159,6 @@ paths:
                 $ref: '#/components/schemas/Status'     
     put:
       tags:
-      - submission
       - workflow
       summary: Update submission status
       description: Update submission status
@@ -241,36 +239,6 @@ paths:
         - submission
       summary: Gets submission data
       operationId: getSubmissionData
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Submission'
-            application/xml:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Submission'
-        '400':
-          description: Invalid submission value  
-  /submission/{submissionId}/image:
-    parameters:
-    - name: submissionId
-      in: path
-      description: ID of submission
-      required: true
-      schema:
-        type: integer
-        format: int64
-    get:
-      tags:
-        - submission
-      summary: Gets submission image
-      operationId: getSubmissionImage
       responses:
         '200':
           description: successful operation
@@ -463,6 +431,8 @@ components:
             - WDL
             - nextflow
             - kubeflow
+        workflow_inputs:
+          type: object
         workflow_url:
           type: string
           format: binary
@@ -480,6 +450,9 @@ components:
         queueId:
           type: integer
           format: int64
+        runId:
+          type: string
+          description: Submission run id
         # status:
         #   type: string
         #   description: Submission Status
@@ -504,7 +477,21 @@ components:
             - file
             - docker
             - workflow
-        input:
+        data:
+          type: object
+          properties:
+            payload:
+              type: string
+              format: binary
+              description: JSON inputs to workflow
+            file:
+              type: string
+              format: binary
+              description: File submission
+            docker:
+              type: string
+              description: Docker + shadigest submmission
+        workflow:
           type: object
           properties:
             workflowType:
@@ -519,16 +506,6 @@ components:
               type: string
               format: binary
               description: Workflow URL or path
-            payload:
-              type: object
-              description: Inputs to the workflow
-            file:
-              type: string
-              format: binary
-              description: File submission
-            docker:
-              type: string
-              description: Docker + shadigest submmission
     Status:
       type: string
       enum:
