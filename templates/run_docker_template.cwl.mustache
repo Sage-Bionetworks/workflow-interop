@@ -1,16 +1,22 @@
 #!/usr/bin/env cwl-runner
 #
-# Run a docker image
+# Run a participant's model
 #
 cwlVersion: v1.0
 class: CommandLineTool
 
-hints:
-  DockerRequirement:
+
+requirements:
+  - class: DockerRequirement
     dockerPull: {{{ docker_repository }}}
+    dockerOutputDirectory: /output
+  - class: InitialWorkDirRequirement
+    listing:
+      - entry: $(inputs.data)
+        entryname: $("/input")
 
 inputs:
-  - id: input
+  - id: data
     type: Directory
 
 outputs:
