@@ -14,7 +14,7 @@ import subprocess32
 import datetime as dt
 
 from contextlib import contextmanager
-from urllib import urlopen
+from urllib.request import urlopen
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,7 +28,10 @@ def open_file(path, mode):
         else:
             f = open(path, mode)
     else:
-        f = urlopen(path)
+        if path.startswith('http'):
+            f = urlopen(path)
+        else:
+            f = open(path, 'r')
     yield f
     f.close()
 
@@ -122,7 +125,7 @@ def get_yaml(filepath):
     """
     try:
         with open_file(filepath, 'r') as f:
-            return yaml.load(f)
+            return yaml.load(f, Loader=yaml.FullLoader)
     except IOError:
         logger.exception("No file found.  Please create: %s." % filepath)
 

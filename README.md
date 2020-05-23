@@ -203,7 +203,7 @@ local: 0.0.0.0:8080
 #### Connect a WES endpoint to a workflow queue
 
 ```python
-config.add_wes_opt(queue_ids='demo_queue', wes_ids='arvados-wes')
+config.add_wes_opt(queue_ids='demo_queue', wes_id='arvados-wes')
 ```
 
 ```console

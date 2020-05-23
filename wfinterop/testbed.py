@@ -69,7 +69,7 @@ def get_checker_id(trs, workflow_id):
     :param str workflow_id:
     """
     target_workflow = trs.get_workflow(id=workflow_id)
-    checker_url = urllib.unquote(target_workflow['checker_url'])
+    checker_url = urllib.parse.unquote(target_workflow['checker_url'])
     checker_id = re.sub('^.*#workflow/', '', checker_url)
     logger.info("found checker workflow: {}".format(checker_id))
     return checker_id
