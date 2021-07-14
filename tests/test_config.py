@@ -14,6 +14,8 @@ from wfinterop.config import add_workflowservice
 from wfinterop.config import add_wes_opt
 from wfinterop.config import set_yaml
 from wfinterop.config import show
+from wfinterop.config import remove_queue
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -109,6 +111,21 @@ def test_add_queue(mock_orchestratorqueues, monkeypatch):
 
     assert('mock_queue' in test_config)
     assert(test_config['mock_queue'] == mock_config)
+
+
+def test_remove_queue(mock_orchestratorqueues, mock_queue_config,
+                      monkeypatch):
+    # GIVEN an orchestrator config file exists
+    monkeypatch.setattr('wfinterop.config.queues_path',
+                        str(mock_orchestratorqueues))
+    remove_queue('mock_queue_1')
+
+    # THEN the evaluation queue config should be removed in the config file
+    with open(str(mock_orchestratorqueues), 'r') as f:
+        test_config = yaml.load(f)
+
+    del mock_queue_config['mock_queue_1']
+    assert test_config == mock_queue_config
 
 
 def test_add_queue_no_wf_id_or_url(mock_orchestratorqueues, monkeypatch):

@@ -157,6 +157,18 @@ def add_queue(queue_id,
     set_yaml('queues', queue_id, config)
 
 
+def remove_queue(queue_id):
+    """Remove queue
+
+    Args:
+        queue_id (str): string identifying the workflow queue
+    """
+    orchestrator_queues = get_yaml(queues_path)
+    if orchestrator_queues.get(queue_id):
+        del orchestrator_queues[queue_id]
+        save_yaml(queues_path, orchestrator_queues)
+
+
 def add_toolregistry(service,
                      host,
                      auth={'Authorization': ''},
