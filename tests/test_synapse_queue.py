@@ -9,10 +9,8 @@ import synapseclient
 from synapseclient.retry import _with_retry
 
 from wfinterop import util
-from wfinterop.synapse_queue import create_submission
-from wfinterop.synapse_queue import get_submissions
-from wfinterop.synapse_queue import get_submission_bundle
-from wfinterop.synapse_queue import update_submission
+from wfinterop.synapse_queue import (create_submission, get_submissions,
+                                     get_submission_bundle, update_submission)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

@@ -27,6 +27,7 @@ Additionally, the application supports the following operations:
 ```console
 git clone https://github.com/Sage-Bionetworks/workflow-interop
 pip install .
+pip install toil[all] challengeutils chevron
 ```
 
 
@@ -306,10 +307,43 @@ from wfinterop import synapse_orchestrator
 import synapseclient
 syn = synapseclient.login()
 
-synapse_orchestrator.run_submission(syn, queue_id=9614423,
-                                    submission_id=9702899, wes_id='local')
-synapse_orchestrator.run_queue(syn, queue_id=9614423,
+# Workflow inputs
+synapse_orchestrator.run_submission(syn, queue_id=9614486,
+                                    submission_id=9703501,
+                                    wes_id='local')
+
+synapse_orchestrator.run_queue(syn, queue_id=9614486,
                                wes_id='local')
-synapse_orchestrator.monitor_queue(syn, queue_id=9614423)
+synapse_orchestrator.monitor_queue(syn, queue_id=9614486)
+
+# Docker submissions
+synapse_orchestrator.run_submission(syn, queue_id=9614487,
+                                    submission_id=9703500,
+                                    wes_id='local')
+
+synapse_orchestrator.run_queue(syn, queue_id=9614487,
+                               wes_id='local')
+synapse_orchestrator.monitor_queue(syn, queue_id=9614487)
+
+# Workflow submissions
+synapse_orchestrator.run_submission(syn, queue_id=9614488,
+                                    submission_id=9703508,
+                                    wes_id='local')
+
+synapse_orchestrator.run_queue(syn, queue_id=9614488,
+                               wes_id='local')
+synapse_orchestrator.monitor_queue(syn, queue_id=9614488)
+
+
+# Prediction file
+synapse_orchestrator.run_submission(syn, queue_id=9614489,
+                                    submission_id=9703603,
+                                    wes_id='local')
+
+synapse_orchestrator.run_queue(syn, queue_id=9614489,
+                               wes_id='local')
+synapse_orchestrator.monitor_queue(syn, queue_id=9614489)
+
+
 ```
 
