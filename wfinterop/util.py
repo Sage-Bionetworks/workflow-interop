@@ -12,6 +12,7 @@ import yaml
 import subprocess32
 
 import datetime as dt
+from challengeutils.utils import update_single_submission_status
 
 from contextlib import contextmanager
 from urllib.request import urlopen
@@ -214,3 +215,34 @@ def convert_timedelta(duration):
     minutes = (seconds % 3600) // 60
     seconds = (seconds % 60)
     return '{}h:{}m:{}s'.format(hours, minutes, seconds)
+
+
+class mock_response:
+    """Mocked status code to return"""
+    status_code = 200
+
+
+def annotate_submission(syn, submissionid, annotation_dict=None,
+                        status=None,
+                        is_private=True, force=False):
+    """
+    Annotate submission with annotation values from a dict
+    Args:
+        syn: Synapse object
+        submissionid: Submission id
+        annotation_dict: Annotation dict
+        is_private: Set annotations acl to private (default is True)
+        force: Force change the annotation from
+               private to public and vice versa.
+    """
+    sub_status = syn.getSubmissionStatus(submissionid)
+    if status is not None:
+        sub_status.status = status
+    # Don't add any annotations that are None
+    annotation_dict = {key: annotation_dict[key] for key in annotation_dict
+                       if annotation_dict[key] is not None}
+    sub_status = update_single_submission_status(sub_status, annotation_dict,
+                                                 is_private=is_private,
+                                                 force=force)
+    syn.store(sub_status)
+    return mock_response

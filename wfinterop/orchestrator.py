@@ -63,7 +63,6 @@ def run_job(queue_id,
     request = {'workflow_url': wf_config['workflow_url'],
                'workflow_params': wf_jsonyaml,
                'attachment': wf_attachments}
-
     parts = []
     if opts is not None:
         parts = build_wes_request(
@@ -246,3 +245,11 @@ def monitor():
     except KeyboardInterrupt:
         print("\nDone")
         return
+
+
+def get_run_log(wes_id, run_id):
+    """Gets a workflows run logs"""
+    wes_instance = WES(wes_id)
+    stderr = wes_instance.get_run_stderr(run_id)
+    stdout = wes_instance.get_run_stdout(run_id)
+    return stderr, stdout

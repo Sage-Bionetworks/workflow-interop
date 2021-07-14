@@ -7,6 +7,7 @@ import json
 import datetime as dt
 
 from bravado.client import SwaggerClient, ResourceDecorator
+import synapseclient
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -336,3 +337,9 @@ def cwl_import_attachment():
     with open('tests/testdata/dockstore-tool-md5sum.cwl', 'r') as f:
         attach_contents = f.read()
     yield ('dockstore-tool-md5sum.cwl', attach_contents)
+
+
+@pytest.fixture()
+def mock_syn():
+    syn = mock.create_autospec(synapseclient.Synapse())
+    yield syn
