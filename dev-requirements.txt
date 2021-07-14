@@ -1,6 +1,4 @@
+coverage
 ipython
 flake8
 pytest
-pytest-cov
-pytest-runner
-python-coveralls
