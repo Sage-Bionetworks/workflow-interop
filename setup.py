@@ -1,13 +1,9 @@
 # First, we try to use setuptools. If it's not available locally,
 # we fall back on ez_setup.
-try:
-    from setuptools import setup
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup
+from setuptools import setup, find_packages
 
-long_description = ''
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 # install_requires = []
 # with open('requirements.txt') as requirements_file:
@@ -23,7 +19,7 @@ long_description = ''
 setup(
     name='workflow-interop',
     description='Interoperable execution of workflows using GA4GH APIs',
-    packages=['wfinterop'],
+    packages=find_packages(),
     package_data={
         'wfinterop': [
             'workflow_execution_service.swagger.yaml',
