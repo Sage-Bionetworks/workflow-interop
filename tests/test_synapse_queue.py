@@ -1,12 +1,12 @@
 import logging
 import mock
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 import pytest
 import json
 import datetime as dt
 
 import synapseclient
-from synapseclient.retry import _with_retry
+from synapseclient.core.retry import with_retry
 
 from wfinterop import util
 from wfinterop.synapse_queue import (create_submission, get_submissions,

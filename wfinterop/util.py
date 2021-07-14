@@ -9,7 +9,7 @@ import os
 import re
 import json
 import yaml
-import subprocess32
+import subprocess
 
 import datetime as dt
 from challengeutils.utils import update_single_submission_status
@@ -53,7 +53,7 @@ def _replace_env_var(match):
     env_var, default = match.groups()
     if env_var == 'GCLOUD_TOKEN':
         try:
-            return subprocess32.check_output(
+            return subprocess.check_output(
                 ['gcloud', 'auth', 'print-access-token']
             ).rstrip()
         except OSError:

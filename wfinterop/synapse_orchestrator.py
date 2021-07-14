@@ -17,7 +17,7 @@ import time
 import chevron
 from IPython.display import display, clear_output
 from synapseclient import Synapse, Submission, SubmissionStatus
-from synapseclient.exceptions import SynapseHTTPError
+from synapseclient.core.exceptions import SynapseHTTPError
 from synapseclient.annotations import from_submission_status_annotations
 
 from wfinterop.config import add_queue, queue_config, wes_config

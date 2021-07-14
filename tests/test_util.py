@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from challengeutils import utils
 import pytest

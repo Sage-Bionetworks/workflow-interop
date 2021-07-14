@@ -1,6 +1,6 @@
+ipython
 flake8
 pytest
 pytest-cov
 pytest-runner
-mock
 python-coveralls

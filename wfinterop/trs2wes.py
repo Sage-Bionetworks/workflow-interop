@@ -12,11 +12,11 @@ import json
 import re
 import glob
 from io import StringIO
-import subprocess32
+import subprocess
 
 import schema_salad.ref_resolver
 
-from toil.wdl import wdl_parser
+from wdlparse.draft2 import wdl_parser
 from wes_service.util import visit
 
 from wfinterop.util import open_file, get_yaml, get_json
@@ -172,7 +172,7 @@ def get_packed_cwl(workflow_url):
             combined CWL workflow
     """
     logger.debug("Packing descriptors for '{}'".format(workflow_url))
-    return subprocess32.check_output(['cwltool', '--pack', workflow_url])
+    return subprocess.check_output(['cwltool', '--pack', workflow_url])
 
 
 def get_flattened_descriptor(workflow_file):

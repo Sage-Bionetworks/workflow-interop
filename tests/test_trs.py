@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import pytest
 
 from bravado.requests_client import RequestsClient

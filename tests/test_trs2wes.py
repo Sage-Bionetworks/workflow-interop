@@ -1,7 +1,7 @@
 import logging
 import os
 import pytest
-import mock
+from unittest import mock
 import yaml
 import json
 

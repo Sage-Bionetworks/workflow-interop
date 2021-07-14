@@ -5,7 +5,7 @@ Synapse Queue
 import logging
 
 from synapseclient import Synapse
-from synapseclient.retry import _with_retry
+from synapseclient.core.retry import with_retry
 
 from .util import annotate_submission
 
@@ -94,10 +94,10 @@ def update_submission(syn: Synapse, submission_id: str, value: dict,
 
     """
     # TODO: No idea how to test this...
-    _with_retry(lambda: annotate_submission(syn, submission_id,
-                                            value, status=status,
-                                            is_private=False,
-                                            force=True),
+    with_retry(lambda: annotate_submission(syn, submission_id,
+                                           value, status=status,
+                                           is_private=False,
+                                           force=True),
                 wait=3,
                 retries=10,
                 retry_status_codes=[412, 429, 500, 502, 503, 504],

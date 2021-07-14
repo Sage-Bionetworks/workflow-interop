@@ -1,6 +1,6 @@
 """Test synapse orchestrator"""
-import mock
-from mock import Mock, patch
+from unittest import mock
+from unittest.mock import Mock, patch
 import pytest
 import datetime as dt
 
@@ -9,10 +9,7 @@ from bravado.client import SwaggerClient, ResourceDecorator
 from bravado.testing.response_mocks import BravadoResponseMock
 import synapseclient
 from synapseclient import SubmissionStatus
-try:
-    from synapseclient.exceptions import SynapseHTTPError
-except ModuleNotFoundError:
-    from synapseclient.core.exceptions import SynapseHTTPError
+from synapseclient.core.exceptions import SynapseHTTPError
 
 from wfinterop.wes.wrapper import WES
 from wfinterop import synapse_orchestrator
@@ -56,11 +53,11 @@ def test__set_in_progress_raises(mock_syn):
 
 @pytest.mark.parametrize(
     "sub,expected",
-    [(SubmissionStatus(dockerRepositoryName="foo"), "docker"),
-     (SubmissionStatus(filePath="foo.cwl"), "cwl"),
-     (SubmissionStatus(filePath="foo.json"), "payload"),
-     (SubmissionStatus(filePath="foo.yaml"), "payload"),
-     (SubmissionStatus(filePath="foo"), "flatfile")]
+    [(SubmissionStatus(dockerRepositoryName="foo", id=1, etag=1), "docker"),
+     (SubmissionStatus(filePath="foo.cwl", id=1, etag=1), "cwl"),
+     (SubmissionStatus(filePath="foo.json", id=1, etag=1), "payload"),
+     (SubmissionStatus(filePath="foo.yaml", id=1, etag=1), "payload"),
+     (SubmissionStatus(filePath="foo", id=1, etag=1), "flatfile")]
 )
 def test_determine_submission_type(sub, expected):
     sub_type = determine_submission_type(sub)
@@ -68,7 +65,7 @@ def test_determine_submission_type(sub, expected):
 
 
 def test_determine_submission_type_error():
-    sub = SubmissionStatus(filePath=None)
+    sub = SubmissionStatus(filePath=None, id=1, etag=1)
     with pytest.raises(ValueError, match="Submission type not supported"):
         determine_submission_type(sub)
 

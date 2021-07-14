@@ -32,7 +32,7 @@ setup(
     install_requires=['wes-service', 'pandas', 'IPython', 'future',
                       'bravado', 'challengeutils'],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'pytest-cov', 'mock'],
+    tests_require=['pytest', 'pytest-cov'],
     license='Apache 2.0',
     zip_safe=False,
     author='Sage Bionetworks CompOnc Team',
