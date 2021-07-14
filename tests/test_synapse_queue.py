@@ -1,5 +1,5 @@
 import logging
-import mock
+from unittest import mock
 from unittest.mock import Mock, patch
 import pytest
 import json
